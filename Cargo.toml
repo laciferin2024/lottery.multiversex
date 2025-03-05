@@ -1,9 +1,16 @@
 [package]
 name = "lottery"
-version = "0.0.0"
+version = "0.0.1"
 publish = false
 edition = "2021"
-authors = ["you"]
+authors = ["Hiro <laciferin@gmail.com>"]
+
+[build]
+target = "wasm32-unknown-unknown"
+
+
+[package.metadata]
+required-tools = ["wasm-opt", "rustup", "cargo"]
 
 [lib]
 path = "src/lottery.rs"
