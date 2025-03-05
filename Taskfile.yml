@@ -4,6 +4,7 @@ version: '3'
 vars:
   mx: "sc-meta"
   DOTENV_FILENAME: .env
+  Wallet: "./wallet/hiro.pem"
 
 env:
   DOTENV_FILENAME: "{{.DOTENV_FILENAME}}"
@@ -15,4 +16,8 @@ tasks:
 
   wallet:
     cmds:
-      - "{{.mx}} wallet new --format pem --outfile ./wallet/hiro.pem"
+      - "{{.mx}} wallet new --format pem --outfile {{.Wallet}}"
+
+  deploy:
+    cmds:
+      - "mxpy contract deploy --pem {{.Wallet}} --gas-limit=60000000 --bytecode output/lottery.wasm"
