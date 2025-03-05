@@ -7,6 +7,10 @@ set dotenv-filename := ".env"
 # set dotenv-filename := ".env.intel"
 set export
 
+mx := "sc-meta"
+
+build:
+  {{mx}} all build
 
 wallet:
-  mx wallet new --format pem --outfile ./wallet/hiro.pem
+  {{mx}} wallet new --format pem --outfile ./wallet/hiro.pem

@@ -1,0 +1,18 @@
+version: '3'
+
+
+vars:
+  mx: "sc-meta"
+  DOTENV_FILENAME: .env
+
+env:
+  DOTENV_FILENAME: "{{.DOTENV_FILENAME}}"
+
+tasks:
+  build:
+    cmds:
+      - "{{.mx}} all build"
+
+  wallet:
+    cmds:
+      - "{{.mx}} wallet new --format pem --outfile ./wallet/hiro.pem"
