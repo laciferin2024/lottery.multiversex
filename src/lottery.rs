@@ -1,4 +1,3 @@
-#![no_std]
 
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
@@ -73,15 +72,17 @@ pub trait Lottery {
     
     fn draw_winner(&self, game_id: u32) {
         // Generate random number (0-9)
-        let random_bytes = self.crypto().random_bytes(1);
-        let random_number = random_bytes[0] % 10;
+        let mut rand_source = RandomnessSource::new();
+
+        let random_number = rand_source.next_u8();
+
         
         // Store the winning number
         self.winning_number(&game_id).set(random_number);
         
         // Find winners
         let participants = self.participants(&game_id);
-        let mut winners = ManagedVec::new();
+        let mut winners  = ManagedVec::new() as ManagedVec<ManagedAddress>;
         
         for i in 0..participants.len() {
             let participant = participants.get(i);
@@ -98,7 +99,7 @@ pub trait Lottery {
         if !winners.is_empty() {
             // Distribute winnings
             let winner_count = winners.len();
-            let prize_per_winner = &total_pot / winner_count;
+            let prize_per_winner = &total_pot / winner_count as u32;
             
             for winner in winners.iter() {
                 // Send tokens to winner
