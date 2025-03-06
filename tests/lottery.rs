@@ -6,5 +6,5 @@ fn world() -> ScenarioWorld {
 
 #[test]
 fn empty_go() {
-    world().run("scenarios/lottery.multiversex.scen.json");
+    world().run("scenarios/lottery.scen.json");
 }

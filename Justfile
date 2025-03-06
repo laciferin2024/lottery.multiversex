@@ -24,3 +24,6 @@ wallet:
 
 deploy *ARGS="":
   mxpy contract deploy --pem {{Wallet}} --gas-limit=60000000 --bytecode output/lottery.wasm --nonce {{nonce}} --chain {{CHAIN}} --proxy {{MULTIVERSX_PROXY}} {{ARGS}}
+
+test:
+  cargo test
