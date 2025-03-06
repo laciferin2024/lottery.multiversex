@@ -1,4 +1,4 @@
-use multiversx_sc::types::{Address, TokenIdentifier, BigUint};
+use multiversx_sc::types::{Address, TokenIdentifier, BigUint, ManagedAddress};
 use multiversx_sc_scenario::{
     scenario_model::{
         Account, AddressValue, ScCallStep, ScDeployStep, ScQueryStep, SetStateStep, TxESDT,
@@ -23,8 +23,8 @@ impl LotteryTestState {
         let mut world = ScenarioWorld::new();
         world.register_contract(LOTTERY_WASM_PATH, lottery::ContractBuilder);
 
-        let owner_address = Address::from("address:owner");
-        let lottery_sc_address = Address::from("sc:lottery");
+        let owner_address = ManagedAddress::from("address:owner");
+        let lottery_sc_address = ManagedAddress::from("sc:lottery");
 
         let lottery_contract = ContractInfo::<lottery::Proxy<DebugApi>>::new("sc:lottery");
 
@@ -162,7 +162,7 @@ fn test_full_game_with_winner() {
 
 #[test]
 fn test_full_game_no_winners() {
-    let mut worldtest_state = LotteryTestState::new();
+    let mut test_state = LotteryTestState::new();
     test_state.setup_accounts();
     test_state.deploy_lottery();
 
