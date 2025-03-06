@@ -1,3 +1,4 @@
+#![no_std]
 
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
