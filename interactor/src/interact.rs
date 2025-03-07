@@ -46,14 +46,18 @@ pub async fn lottery_cli() {
         }
         "getGameStatus" => interact.get_game_status().await,
         "mint" => {
-            interact.mint(get_addr(), 1000u128).await
+            let address = get_addr();
+            interact.mint(address.clone(), 1000u128).await;
+            interact.get_token_balance(address).await
         }
         "getTokenBalance" => {
             interact.get_token_balance(get_addr()).await
         }
-        "token_id" => interact.token_id().await,
+        "token_id" => { interact.token_id().await; }
         "num_participants" => interact.num_participants().await,
-        "bet_amount" => interact.bet_amount().await,
+        "bet_amount" => {
+            interact.bet_amount().await;
+        }
         "burn" => interact.burn().await,
         "transfer" => interact.transfer().await,
         "getTokenSupply" => interact.get_token_supply().await,
@@ -65,6 +69,8 @@ pub async fn lottery_cli() {
         "getLpBalance" => interact.get_lp_balance().await,
         _ => panic!("unknown command: {}", &cmd),
     }
+
+    return;
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -178,9 +184,13 @@ impl ContractInteract {
     }
 
     pub async fn place_bet(&mut self, chosen_number: u8) {
-        let token_id = String::new();
-        let token_nonce = 0u64;
-        let token_amount = BigUint::<StaticApi>::from(0u128);
+        let token_id = self.token_id().await;
+        let token_nonce = 1u64;
+
+        let token_amount = self.bet_amount().await;
+        let token_amount = BigUint::<StaticApi>::from(token_amount);
+
+        dbg!("token_amt: {}",token_amount.clone().to_u64());
 
 
         let response = self
@@ -213,7 +223,7 @@ impl ContractInteract {
         println!("Result: {result_value:?}");
     }
 
-    pub async fn token_id(&mut self) {
+    pub async fn token_id(&mut self) -> String {
         let result_value = self
             .interactor
             .query()
@@ -225,6 +235,7 @@ impl ContractInteract {
             .await;
 
         println!("Result: {result_value:?}");
+        result_value.to_string()
     }
 
     pub async fn num_participants(&mut self) {
@@ -241,7 +252,7 @@ impl ContractInteract {
         println!("Result: {result_value:?}");
     }
 
-    pub async fn bet_amount(&mut self) {
+    pub async fn bet_amount(&mut self) -> multiversx_sc::codec::num_bigint::BigUint {
         let result_value = self
             .interactor
             .query()
@@ -253,6 +264,8 @@ impl ContractInteract {
             .await;
 
         println!("Result: {result_value:?}");
+
+        result_value
     }
 
     pub async fn mint(&mut self, address: Bech32Address, value: u128) {

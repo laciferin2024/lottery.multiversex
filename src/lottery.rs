@@ -169,18 +169,24 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
     #[storage_mapper("betAmount")]
     fn bet_amount(&self) -> SingleValueMapper<BigUint>;
 
+
+    #[view]
     #[storage_mapper("gameActive")]
     fn game_active(&self) -> SingleValueMapper<bool>;
 
+
+    #[view]
     #[storage_mapper("currentGameId")]
     fn current_game_id(&self) -> SingleValueMapper<u32>;
 
     #[storage_mapper("participants")]
     fn participants(&self, game_id: &u32) -> VecMapper<ManagedAddress>;
 
+    #[view]
     #[storage_mapper("playerNumbers")]
     fn player_numbers(&self, game_id: &u32, player: &ManagedAddress) -> SingleValueMapper<u8>;
 
+    #[view]
     #[storage_mapper("hasPlacedBet")]
     fn has_placed_bet(&self, game_id: &u32, player: &ManagedAddress) -> SingleValueMapper<bool>;
 
