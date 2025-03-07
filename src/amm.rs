@@ -26,9 +26,9 @@ pub trait AutomatedMarketMaker {
     // Add liquidity with EGLD and custom token
     #[payable("EGLD")]
     #[endpoint]
-    fn add_liquidity_egld(&self, custom_token_amount: BigUint) -> SCResult<()> {
+    fn add_liquidity_egld(&self, custom_token_amount: BigUint)  {
         let caller = self.blockchain().get_caller();
-        let egld_amount = self.call_value().egld_value();
+        let egld_amount = self.call_value().egld();
 
         // Calculate liquidity tokens to mint
         let lp_tokens = if self.lp_token_supply().get() == BigUint::zero() {
@@ -46,7 +46,7 @@ pub trait AutomatedMarketMaker {
         };
 
         // Transfer custom tokens from user to contract
-        self.send().esdt_local_exec_accept_payment(
+        self.send().direct_esdt(
             &caller,
             &self.custom_token_id().get(),
             0,
@@ -60,13 +60,11 @@ pub trait AutomatedMarketMaker {
         // Mint LP tokens to user
         self.lp_token_balance(&caller).update(|balance| *balance += &lp_tokens);
         self.lp_token_supply().update(|supply| *supply += &lp_tokens);
-
-        Ok(())
     }
 
     // Remove liquidity
     #[endpoint]
-    fn remove_liquidity(&self, lp_token_amount: BigUint) -> SCResult<()> {
+    fn remove_liquidity(&self, lp_token_amount: BigUint)  {
         let caller = self.blockchain().get_caller();
         let caller_lp_balance = self.lp_token_balance(&caller).get();
 
@@ -74,13 +72,13 @@ pub trait AutomatedMarketMaker {
 
         // Calculate proportion of liquidity to return
         let total_lp_supply = self.lp_token_supply().get();
-        let proportion = &lp_token_amount * &BigUint::from(10000u32) / &total_lp_supply;
+        let proportion = &lp_token_amount * &BigUint::from(10000u64) / &total_lp_supply;
 
         let egld_reserve = self.egld_reserve().get();
         let token_reserve = self.token_reserve().get();
 
-        let egld_amount = &proportion * &egld_reserve / BigUint::from(10000u32);
-        let token_amount = &proportion * &token_reserve / BigUint::from(10000u32);
+        let egld_amount = &proportion * &egld_reserve / BigUint::from(10000u64);
+        let token_amount = &proportion * &token_reserve / BigUint::from(10000u64);
 
         // Burn LP tokens
         self.lp_token_balance(&caller).update(|balance| *balance -= &lp_token_amount);
@@ -99,15 +97,14 @@ pub trait AutomatedMarketMaker {
             &token_amount
         );
 
-        Ok(())
     }
 
     // Swap EGLD for tokens
     #[payable("EGLD")]
     #[endpoint]
-    fn swap_egld_for_tokens(&self) -> SCResult<()> {
+    fn swap_egld_for_tokens(&self){
         let caller = self.blockchain().get_caller();
-        let payment_amount = self.call_value().egld_value();
+        let payment_amount = self.call_value().egld();
 
         let egld_reserve = self.egld_reserve().get();
         let token_reserve = self.token_reserve().get();
@@ -116,9 +113,9 @@ pub trait AutomatedMarketMaker {
 
         // Calculate output amount using constant product formula with fee
         let fee_percent = self.fee_percent().get();
-        let input_with_fee = &payment_amount.clone_value() * &BigUint::from(10000u32 - fee_percent);
+        let input_with_fee = &payment_amount.clone_value() * &BigUint::from(10000u64 - fee_percent);
         let numerator = &input_with_fee * &token_reserve;
-        let denominator = &egld_reserve * &BigUint::from(10000u32) + &input_with_fee;
+        let denominator = &egld_reserve * &BigUint::from(10000u64) + &input_with_fee;
         let tokens_out = numerator / denominator;
 
         require!(tokens_out > BigUint::zero(), "Output amount too small");
@@ -135,12 +132,12 @@ pub trait AutomatedMarketMaker {
             &tokens_out
         );
 
-        Ok(())
     }
 
     // Swap tokens for EGLD
+    #[payable("*")]
     #[endpoint]
-    fn swap_tokens_for_egld(&self){
+    fn swap_tokens_for_egld(&self) {
         let caller = self.blockchain().get_caller();
         let payment = self.call_value().single_esdt();
 
@@ -156,19 +153,20 @@ pub trait AutomatedMarketMaker {
 
         // Calculate output amount using constant product formula with fee
         let fee_percent = self.fee_percent().get();
-        let input_with_fee = &payment.amount * &BigUint::from(10000u32 - fee_percent);
+        let input_with_fee = &payment.amount * &BigUint::from(10000u64 - fee_percent);
         let numerator = &input_with_fee * &egld_reserve;
-        let denominator = &token_reserve * &BigUint::from(10000u32) + &input_with_fee;
+        let denominator = &token_reserve * &BigUint::from(10000u64) + &input_with_fee;
         let egld_out = numerator / denominator;
 
         require!(egld_out > BigUint::zero(), "Output amount too small");
-        
+
         // Update reserves
         self.token_reserve().update(|reserve| *reserve += &payment.amount);
         self.egld_reserve().update(|reserve| *reserve -= &egld_out);
-        
+
         // Send EGLD to caller
         self.send().direct_egld(&caller, &egld_out);
+
     }
     
     // Views
