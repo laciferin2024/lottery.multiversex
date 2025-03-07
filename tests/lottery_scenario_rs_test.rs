@@ -9,6 +9,6 @@ fn world() -> ScenarioWorld {
 }
 
 #[test]
-fn empty_rs() {
+fn lottery_rs() {
     world().run("scenarios/lottery.scen.json");
 }
