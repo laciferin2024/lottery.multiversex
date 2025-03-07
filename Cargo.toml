@@ -15,6 +15,9 @@ required-tools = ["wasm-opt", "rustup", "cargo"]
 [lib]
 path = "src/lottery.rs"
 
+[dependencies]
+multiversx-sc-scenario = { version = "0.56.1", features = ["run-go-tests"] }
+
 [dependencies.multiversx-sc]
 version = "0.56.1"
 
