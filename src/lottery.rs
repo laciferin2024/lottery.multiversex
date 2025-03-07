@@ -29,7 +29,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         self.init_amm(token_id.clone(), fee_percent);
 
         // Default lottery settings
-        let num_participants = 5usize;
+        let num_participants = 1usize;
         let bet_amount = BigUint::from(10u64);
 
         // Initialize lottery
@@ -106,10 +106,11 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
     }
 
     fn draw_winner(&self, game_id: u32) {
+        sc_print!("draw winner:{}",game_id);
         // Generate random number (0-9)
         let mut rand_source = RandomnessSource::new();
 
-        let random_number = rand_source.next_u8();
+        let random_number = rand_source.next_u8_in_range(0, 10); //TODO: should be checked
 
         // Store the winning number
         self.winning_number(&game_id).set(random_number);
