@@ -26,3 +26,12 @@ version = "0.56.1"
 
 [workspace]
 members = [".", "meta", "interactor"]
+
+
+[profile.release]
+panic = "abort"
+lto = true
+codegen-units = 1
+opt-level = "z"
+debug = false
+overflow-checks = false
