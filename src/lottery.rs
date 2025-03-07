@@ -94,7 +94,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
 
         // If all participants have joined, draw the winner
         if participants.len() == self.num_participants().get() {
-            // self.draw_winner(current_game_id);
+            self.draw_winner(current_game_id);
         }
     }
 

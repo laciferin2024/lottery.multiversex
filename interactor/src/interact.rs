@@ -51,8 +51,8 @@ pub async fn lottery_cli() {
 
     match cmd.as_str() {
         "deploy" => {
-            let num_partipants = arg().parse::<usize>().unwrap();
-            interact.deploy(num_partipants).await
+            let num_participants = arg().parse::<usize>().unwrap();
+            interact.deploy(num_participants).await;
         }
         "upgrade" => interact.upgrade().await,
         "place_bet" => {
@@ -143,8 +143,8 @@ impl ContractInteract {
     pub async fn new(config: Config) -> Self {
         let mut interactor = Interactor::new(config.gateway_uri())
             .await
-            .use_chain_simulator(config.use_chain_simulator())
-            .with_tracer("trace1.scen.json");
+            .use_chain_simulator(config.use_chain_simulator());
+        // .with_tracer("trace1.scen.json");
 
         interactor.set_current_dir_from_workspace("lottery");
         let wallet_address = interactor.register_wallet(test_wallets::alice()).await;
