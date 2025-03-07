@@ -23,7 +23,10 @@ build *ARGS:
 wallet:
     {{ mx }} wallet new --format pem --outfile ./wallet/hiro.pem
 
-deploy *ARGS="":
+deploy *ARGS: build
+    just i deploy
+
+deploy1 *ARGS="":
     mxpy contract deploy --pem {{ Wallet }} --gas-limit=60000000 --bytecode output/lottery.wasm --nonce {{ nonce }} --chain {{ CHAIN }} --proxy {{ MULTIVERSX_PROXY }} {{ ARGS }}
 
 call *ARGS="":
@@ -34,3 +37,8 @@ test:
 
 interactor *ARGS:
     {{ mx }} all snippets {{ ARGS }}
+
+i cmd *ARGS:
+    #!/bin/bash
+    cd interactor
+    cargo run {{ cmd }} {{ ARGS }}

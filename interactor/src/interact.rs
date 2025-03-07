@@ -20,16 +20,28 @@ pub async fn lottery_cli() {
     let _ = args.next();
     let cmd = args.next().expect("at least one argument required");
     let config = Config::new();
+
     let mut interact = ContractInteract::new(config).await;
+
     match cmd.as_str() {
         "deploy" => interact.deploy().await,
         "upgrade" => interact.upgrade().await,
         "place_bet" => interact.place_bet().await,
         "getGameStatus" => interact.get_game_status().await,
-        "mint" => interact.mint().await,
+        "mint" => {
+            let address = args.next();
+            let address = Bech32Address::from_bech32_string(address.unwrap());
+
+            interact.mint(address, 1000u128).await
+        }
         "burn" => interact.burn().await,
         "transfer" => interact.transfer().await,
-        "getTokenBalance" => interact.get_token_balance().await,
+        "getTokenBalance" => {
+            let address = args.next();
+            let address = Bech32Address::from_bech32_string(address.unwrap());
+
+            interact.get_token_balance(address).await
+        }
         "getTokenSupply" => interact.get_token_supply().await,
         "add_liquidity_egld" => interact.add_liquidity_egld().await,
         "remove_liquidity" => interact.remove_liquidity().await,
@@ -43,49 +55,49 @@ pub async fn lottery_cli() {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct State {
-    contract_address: Option<Bech32Address>
+    contract_address: Option<Bech32Address>,
 }
 
 impl State {
-        // Deserializes state from file
-        pub fn load_state() -> Self {
-            if Path::new(STATE_FILE).exists() {
-                let mut file = std::fs::File::open(STATE_FILE).unwrap();
-                let mut content = String::new();
-                file.read_to_string(&mut content).unwrap();
-                toml::from_str(&content).unwrap()
-            } else {
-                Self::default()
-            }
-        }
-    
-        /// Sets the contract address
-        pub fn set_address(&mut self, address: Bech32Address) {
-            self.contract_address = Some(address);
-        }
-    
-        /// Returns the contract address
-        pub fn current_address(&self) -> &Bech32Address {
-            self.contract_address
-                .as_ref()
-                .expect("no known contract, deploy first")
+    // Deserializes state from file
+    pub fn load_state() -> Self {
+        if Path::new(STATE_FILE).exists() {
+            let mut file = std::fs::File::open(STATE_FILE).unwrap();
+            let mut content = String::new();
+            file.read_to_string(&mut content).unwrap();
+            toml::from_str(&content).unwrap()
+        } else {
+            Self::default()
         }
     }
-    
-    impl Drop for State {
-        // Serializes state to file
-        fn drop(&mut self) {
-            let mut file = std::fs::File::create(STATE_FILE).unwrap();
-            file.write_all(toml::to_string(self).unwrap().as_bytes())
-                .unwrap();
-        }
+
+    /// Sets the contract address
+    pub fn set_address(&mut self, address: Bech32Address) {
+        self.contract_address = Some(address);
     }
+
+    /// Returns the contract address
+    pub fn current_address(&self) -> &Bech32Address {
+        self.contract_address
+            .as_ref()
+            .expect("no known contract, deploy first")
+    }
+}
+
+impl Drop for State {
+    // Serializes state to file
+    fn drop(&mut self) {
+        let mut file = std::fs::File::create(STATE_FILE).unwrap();
+        file.write_all(toml::to_string(self).unwrap().as_bytes())
+            .unwrap();
+    }
+}
 
 pub struct ContractInteract {
     interactor: Interactor,
     wallet_address: Address,
     contract_code: BytesValue,
-    state: State
+    state: State,
 }
 
 impl ContractInteract {
@@ -100,7 +112,7 @@ impl ContractInteract {
         // Useful in the chain simulator setting
         // generate blocks until ESDTSystemSCAddress is enabled
         interactor.generate_blocks_until_epoch(1).await.unwrap();
-        
+
         let contract_code = BytesValue::interpret_from(
             "mxsc:../output/lottery.mxsc.json",
             &InterpreterContext::default(),
@@ -110,7 +122,7 @@ impl ContractInteract {
             interactor,
             wallet_address,
             contract_code,
-            state: State::load_state()
+            state: State::load_state(),
         }
     }
 
@@ -188,9 +200,8 @@ impl ContractInteract {
         println!("Result: {result_value:?}");
     }
 
-    pub async fn mint(&mut self) {
-        let recipient = bech32::decode("");
-        let amount = BigUint::<StaticApi>::from(0u128);
+    pub async fn mint(&mut self, address: Bech32Address, value: u128) {
+        let amount = BigUint::<StaticApi>::from(value);
 
         let response = self
             .interactor
@@ -199,7 +210,7 @@ impl ContractInteract {
             .to(self.state.current_address())
             .gas(30_000_000u64)
             .typed(proxy::LotteryProxy)
-            .mint(recipient, amount)
+            .mint(address, amount)
             .returns(ReturnsResultUnmanaged)
             .run()
             .await;
@@ -244,9 +255,7 @@ impl ContractInteract {
         println!("Result: {response:?}");
     }
 
-    pub async fn get_token_balance(&mut self) {
-        let address = bech32::decode("");
-
+    pub async fn get_token_balance(&mut self, address: Bech32Address) {
         let result_value = self
             .interactor
             .query()
@@ -382,5 +391,4 @@ impl ContractInteract {
 
         println!("Result: {result_value:?}");
     }
-
 }
