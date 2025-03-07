@@ -23,24 +23,32 @@ pub async fn lottery_cli() {
 
     let mut interact = ContractInteract::new(config).await;
 
+
+    let mut arg = || -> String{
+        args.next().expect("expected argument")
+    };
+
+    let mut get_addr = || -> Bech32Address{
+        let address = arg();
+        let address = Bech32Address::from_bech32_string(address);
+        address
+    };
+
     match cmd.as_str() {
         "deploy" => interact.deploy().await,
         "upgrade" => interact.upgrade().await,
-        "place_bet" => interact.place_bet().await,
+        "place_bet" => {
+            let no = arg();
+            interact.place_bet(no.parse::<u8>().unwrap()).await
+        }
         "getGameStatus" => interact.get_game_status().await,
         "mint" => {
-            let address = args.next();
-            let address = Bech32Address::from_bech32_string(address.unwrap());
-
-            interact.mint(address, 1000u128).await
+            interact.mint(get_addr(), 1000u128).await
         }
         "burn" => interact.burn().await,
         "transfer" => interact.transfer().await,
         "getTokenBalance" => {
-            let address = args.next();
-            let address = Bech32Address::from_bech32_string(address.unwrap());
-
-            interact.get_token_balance(address).await
+            interact.get_token_balance(get_addr()).await
         }
         "getTokenSupply" => interact.get_token_supply().await,
         "add_liquidity_egld" => interact.add_liquidity_egld().await,
@@ -163,12 +171,11 @@ impl ContractInteract {
         println!("Result: {response:?}");
     }
 
-    pub async fn place_bet(&mut self) {
+    pub async fn place_bet(&mut self, chosen_number: u8) {
         let token_id = String::new();
         let token_nonce = 0u64;
-        let token_amount = BigUint::<StaticApi>::from(0u128);
 
-        let chosen_number = 0u8;
+        let token_amount = BigUint::<StaticApi>::from(0u128);
 
         let response = self
             .interactor
