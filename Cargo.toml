@@ -25,4 +25,4 @@ num-bigint = "0.4"
 version = "0.56.1"
 
 [workspace]
-members = [".", "meta"]
+members = [".", "meta", "interactor"]
