@@ -30,7 +30,7 @@ deploy1 *ARGS="":
     mxpy contract deploy --pem {{ Wallet }} --gas-limit=60000000 --bytecode output/lottery.wasm --nonce {{ nonce }} --chain {{ CHAIN }} --proxy {{ MULTIVERSX_PROXY }} {{ ARGS }}
 
 call *ARGS="":
-    mxpy contract call erd1qqqqqqqqqqqqqpgq8cke70s93hmd9f68vx0lu6aurn2jppuy48jqj9kgj8 --function=init  --arguments "1"  --pem {{ Wallet }} --nonce {{ nonce }} --chain {{ CHAIN }} --proxy {{ MULTIVERSX_PROXY }} --gas-limit 1 {{ ARGS }}
+    mxpy contract call erd1qqqqqqqqqqqqqpgqej707lk86ap308nyauejqhvvq0sgmpq8d8ss2nmpvf --function=beta_amount  --arguments "1"  --pem {{ Wallet }} --nonce {{ nonce }} --chain {{ CHAIN }} --proxy {{ MULTIVERSX_PROXY }} --gas-limit 1 {{ ARGS }}
 
 test:
     cargo test
@@ -42,3 +42,12 @@ i cmd *ARGS:
     #!/bin/bash
     cd interactor
     cargo run {{ cmd }} {{ ARGS }}
+
+TOKEN := "LTRY-94ac38"
+
+token recv_address *ARGS:
+    mxpy tx send --recall-nonce \
+    --receiver {{ recv_address }} \
+    --value 0 \
+    --data "ESDTTransfer@4c5452592d393461633338@10f0cf064dd592000000" \
+    ---pem {{ Wallet }} --nonce {{ nonce }} --chain {{ CHAIN }} --proxy {{ MULTIVERSX_PROXY }} --gas-limit 1 {{ ARGS }}
