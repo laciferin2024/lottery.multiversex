@@ -129,6 +129,56 @@ where
             .original_result()
     }
 
+    pub fn game_active(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, bool> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("game_active")
+            .original_result()
+    }
+
+    pub fn current_game_id(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, u32> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("current_game_id")
+            .original_result()
+    }
+
+    pub fn player_numbers<
+        Arg0: ProxyArg<u32>,
+        Arg1: ProxyArg<ManagedAddress<Env::Api>>,
+    >(
+        self,
+        game_id: Arg0,
+        player: Arg1,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, u8> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("player_numbers")
+            .argument(&game_id)
+            .argument(&player)
+            .original_result()
+    }
+
+    pub fn has_placed_bet<
+        Arg0: ProxyArg<u32>,
+        Arg1: ProxyArg<ManagedAddress<Env::Api>>,
+    >(
+        self,
+        game_id: Arg0,
+        player: Arg1,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, bool> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("has_placed_bet")
+            .argument(&game_id)
+            .argument(&player)
+            .original_result()
+    }
+
     pub fn mint<
         Arg0: ProxyArg<ManagedAddress<Env::Api>>,
         Arg1: ProxyArg<BigUint<Env::Api>>,

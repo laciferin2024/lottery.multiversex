@@ -35,7 +35,7 @@ call *ARGS="":
 test:
     cargo test
 
-interactor *ARGS:
+gen-i *ARGS:
     {{ mx }} all snippets {{ ARGS }}
 
 i cmd *ARGS:
