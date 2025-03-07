@@ -26,6 +26,17 @@ pub async fn lottery_cli() {
         "upgrade" => interact.upgrade().await,
         "place_bet" => interact.place_bet().await,
         "getGameStatus" => interact.get_game_status().await,
+        "mint" => interact.mint().await,
+        "burn" => interact.burn().await,
+        "transfer" => interact.transfer().await,
+        "getTokenBalance" => interact.get_token_balance().await,
+        "getTokenSupply" => interact.get_token_supply().await,
+        "add_liquidity_egld" => interact.add_liquidity_egld().await,
+        "remove_liquidity" => interact.remove_liquidity().await,
+        "swap_egld_for_tokens" => interact.swap_egld_for_tokens().await,
+        "swap_tokens_for_egld" => interact.swap_tokens_for_egld().await,
+        "getPoolInfo" => interact.get_pool_info().await,
+        "getLpBalance" => interact.get_lp_balance().await,
         _ => panic!("unknown command: {}", &cmd),
     }
 }
@@ -104,17 +115,13 @@ impl ContractInteract {
     }
 
     pub async fn deploy(&mut self) {
-        let token_id = TokenIdentifier::from_esdt_bytes(&b""[..]);
-        let num_participants = 0u32;
-        let bet_amount = BigUint::<StaticApi>::from(0u128);
-
         let new_address = self
             .interactor
             .tx()
             .from(&self.wallet_address)
             .gas(30_000_000u64)
             .typed(proxy::LotteryProxy)
-            .init(token_id, num_participants, bet_amount)
+            .init()
             .code(&self.contract_code)
             .returns(ReturnsNewAddress)
             .run()
@@ -174,6 +181,201 @@ impl ContractInteract {
             .to(self.state.current_address())
             .typed(proxy::LotteryProxy)
             .get_game_status()
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {result_value:?}");
+    }
+
+    pub async fn mint(&mut self) {
+        let recipient = bech32::decode("");
+        let amount = BigUint::<StaticApi>::from(0u128);
+
+        let response = self
+            .interactor
+            .tx()
+            .from(&self.wallet_address)
+            .to(self.state.current_address())
+            .gas(30_000_000u64)
+            .typed(proxy::LotteryProxy)
+            .mint(recipient, amount)
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {response:?}");
+    }
+
+    pub async fn burn(&mut self) {
+        let amount = BigUint::<StaticApi>::from(0u128);
+
+        let response = self
+            .interactor
+            .tx()
+            .from(&self.wallet_address)
+            .to(self.state.current_address())
+            .gas(30_000_000u64)
+            .typed(proxy::LotteryProxy)
+            .burn(amount)
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {response:?}");
+    }
+
+    pub async fn transfer(&mut self) {
+        let recipient = bech32::decode("");
+        let amount = BigUint::<StaticApi>::from(0u128);
+
+        let response = self
+            .interactor
+            .tx()
+            .from(&self.wallet_address)
+            .to(self.state.current_address())
+            .gas(30_000_000u64)
+            .typed(proxy::LotteryProxy)
+            .transfer(recipient, amount)
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {response:?}");
+    }
+
+    pub async fn get_token_balance(&mut self) {
+        let address = bech32::decode("");
+
+        let result_value = self
+            .interactor
+            .query()
+            .to(self.state.current_address())
+            .typed(proxy::LotteryProxy)
+            .get_token_balance(address)
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {result_value:?}");
+    }
+
+    pub async fn get_token_supply(&mut self) {
+        let result_value = self
+            .interactor
+            .query()
+            .to(self.state.current_address())
+            .typed(proxy::LotteryProxy)
+            .get_token_supply()
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {result_value:?}");
+    }
+
+    pub async fn add_liquidity_egld(&mut self) {
+        let egld_amount = BigUint::<StaticApi>::from(0u128);
+
+        let custom_token_amount = BigUint::<StaticApi>::from(0u128);
+
+        let response = self
+            .interactor
+            .tx()
+            .from(&self.wallet_address)
+            .to(self.state.current_address())
+            .gas(30_000_000u64)
+            .typed(proxy::LotteryProxy)
+            .add_liquidity_egld(custom_token_amount)
+            .egld(egld_amount)
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {response:?}");
+    }
+
+    pub async fn remove_liquidity(&mut self) {
+        let lp_token_amount = BigUint::<StaticApi>::from(0u128);
+
+        let response = self
+            .interactor
+            .tx()
+            .from(&self.wallet_address)
+            .to(self.state.current_address())
+            .gas(30_000_000u64)
+            .typed(proxy::LotteryProxy)
+            .remove_liquidity(lp_token_amount)
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {response:?}");
+    }
+
+    pub async fn swap_egld_for_tokens(&mut self) {
+        let egld_amount = BigUint::<StaticApi>::from(0u128);
+
+        let response = self
+            .interactor
+            .tx()
+            .from(&self.wallet_address)
+            .to(self.state.current_address())
+            .gas(30_000_000u64)
+            .typed(proxy::LotteryProxy)
+            .swap_egld_for_tokens()
+            .egld(egld_amount)
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {response:?}");
+    }
+
+    pub async fn swap_tokens_for_egld(&mut self) {
+        let token_id = String::new();
+        let token_nonce = 0u64;
+        let token_amount = BigUint::<StaticApi>::from(0u128);
+
+        let response = self
+            .interactor
+            .tx()
+            .from(&self.wallet_address)
+            .to(self.state.current_address())
+            .gas(30_000_000u64)
+            .typed(proxy::LotteryProxy)
+            .swap_tokens_for_egld()
+            .payment((TokenIdentifier::from(token_id.as_str()), token_nonce, token_amount))
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {response:?}");
+    }
+
+    pub async fn get_pool_info(&mut self) {
+        let result_value = self
+            .interactor
+            .query()
+            .to(self.state.current_address())
+            .typed(proxy::LotteryProxy)
+            .get_pool_info()
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {result_value:?}");
+    }
+
+    pub async fn get_lp_balance(&mut self) {
+        let address = bech32::decode("");
+
+        let result_value = self
+            .interactor
+            .query()
+            .to(self.state.current_address())
+            .typed(proxy::LotteryProxy)
+            .get_lp_balance(address)
             .returns(ReturnsResultUnmanaged)
             .run()
             .await;
