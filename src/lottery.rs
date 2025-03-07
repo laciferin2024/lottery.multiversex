@@ -1,12 +1,47 @@
 #![no_std]
 
+mod amm;
+mod token;
+
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
 
 #[multiversx_sc::contract]
-pub trait Lottery {
+pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
     #[init]
-    fn init(&self, token_id: TokenIdentifier, num_participants: usize, bet_amount: BigUint) {
+    fn init(&self, num_participants: usize) -> () {
+        // Default token information
+        let token_name = ManagedBuffer::from("LotteryToken");
+        let token_ticker = ManagedBuffer::from("LTRY");
+        let initial_supply = BigUint::from(1_000_000u64);
+
+        // Initialize token module
+        self.init_token(initial_supply.clone(), token_name, token_ticker.clone());
+
+        // Get token ID (using the ticker as an approximation since we're creating the token in-contract)
+        let token_id = TokenIdentifier::from_esdt_bytes("LTRY-94ac38");
+        // let token_id = TokenIdentifier::from_esdt_bytes(self.token_ticker());
+
+        // Default AMM settings
+        let fee_percent = 30u64; // 0.3% fee
+
+        // Initialize AMM module
+        self.init_amm(token_id.clone(), fee_percent);
+
+        // Default lottery settings
+        // let num_participants = 1usize;
+        let bet_amount = BigUint::from(10u64);
+
+        // Initialize lottery
+        self.init_lottery(token_id, num_participants, bet_amount);
+    }
+
+    fn init_lottery(
+        &self,
+        token_id: TokenIdentifier,
+        num_participants: usize,
+        bet_amount: BigUint,
+    ) {
         self.token_id().set(&token_id);
         self.num_participants().set(num_participants);
         self.bet_amount().set(&bet_amount);
@@ -54,8 +89,11 @@ pub trait Lottery {
             .set(chosen_number);
         self.has_placed_bet(&current_game_id, &caller).set(true);
 
+
+        let participants = self.participants(&current_game_id);
+
         // If all participants have joined, draw the winner
-        if self.participants(&current_game_id).len() == self.num_participants().get() {
+        if participants.len() == self.num_participants().get() {
             self.draw_winner(current_game_id);
         }
     }
@@ -71,10 +109,11 @@ pub trait Lottery {
     }
 
     fn draw_winner(&self, game_id: u32) {
+        sc_print!("draw winner:{}",game_id);
         // Generate random number (0-9)
         let mut rand_source = RandomnessSource::new();
 
-        let random_number = rand_source.next_u8();
+        let random_number = rand_source.next_u8_in_range(0, 10); //TODO: should be checked
 
         // Store the winning number
         self.winning_number(&game_id).set(random_number);
@@ -83,7 +122,16 @@ pub trait Lottery {
         let participants = self.participants(&game_id);
         let mut winners = ManagedVec::new() as ManagedVec<ManagedAddress>;
 
+        // for participant in participants.iter() {
+        //     let player_number = self.player_numbers(&game_id, &participant).get();
+        //
+        //     if player_number == random_number {
+        //         winners.push(participant);
+        //     }
+        // }
+
         for i in 0..participants.len() {
+            // FIXME: u can't do this as participants.get is fetching from blockchain but this is being called
             let participant = participants.get(i);
             let player_number = self.player_numbers(&game_id, &participant).get();
 
@@ -106,13 +154,15 @@ pub trait Lottery {
                     .direct_esdt(&winner, &self.token_id().get(), 0, &prize_per_winner);
             }
         } else {
-            // No winners, return tokens to players
+            // No winners, return half of the tokens to players
+            let half_bet_amount = &self.bet_amount().get() / 2u32; //FIXME: 50% penality
+
             for participant in participants.iter() {
                 self.send().direct_esdt(
                     &participant,
                     &self.token_id().get(),
                     0,
-                    &self.bet_amount().get(),
+                    &half_bet_amount,
                 );
             }
         }
@@ -122,27 +172,36 @@ pub trait Lottery {
     }
 
     // Storage mappers
+    #[view]
     #[storage_mapper("tokenId")]
     fn token_id(&self) -> SingleValueMapper<TokenIdentifier>;
 
+    #[view]
     #[storage_mapper("numParticipants")]
     fn num_participants(&self) -> SingleValueMapper<usize>;
 
+    #[view]
     #[storage_mapper("betAmount")]
     fn bet_amount(&self) -> SingleValueMapper<BigUint>;
 
+
+    #[view]
     #[storage_mapper("gameActive")]
     fn game_active(&self) -> SingleValueMapper<bool>;
 
+
+    #[view]
     #[storage_mapper("currentGameId")]
     fn current_game_id(&self) -> SingleValueMapper<u32>;
 
     #[storage_mapper("participants")]
     fn participants(&self, game_id: &u32) -> VecMapper<ManagedAddress>;
 
+    #[view]
     #[storage_mapper("playerNumbers")]
     fn player_numbers(&self, game_id: &u32, player: &ManagedAddress) -> SingleValueMapper<u8>;
 
+    #[view]
     #[storage_mapper("hasPlacedBet")]
     fn has_placed_bet(&self, game_id: &u32, player: &ManagedAddress) -> SingleValueMapper<bool>;
 
