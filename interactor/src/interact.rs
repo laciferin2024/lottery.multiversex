@@ -173,7 +173,7 @@ impl ContractInteract {
             .from(&self.wallet_address)
             .gas(30_000_000u64)
             .typed(proxy::LotteryProxy)
-            .init()
+            .init(num_participants)
             .code(&self.contract_code)
             .returns(ReturnsNewAddress)
             .run()
