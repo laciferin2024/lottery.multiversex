@@ -3,10 +3,10 @@
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
 
-#[multiversx_sc::contract]
+#[multiversx_sc::module]
 pub trait LotteryToken {
-    #[init]
-    fn init(
+
+    fn init_token(
         &self,
         initial_supply: BigUint,
         token_name: ManagedBuffer,

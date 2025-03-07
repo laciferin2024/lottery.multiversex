@@ -1,12 +1,24 @@
 #![no_std]
 
+mod amm;
+mod token;
+
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
 
 #[multiversx_sc::contract]
-pub trait Lottery {
+pub trait Lottery : token::LotteryToken + amm::LotteryAMM{
+
     #[init]
-    fn init(
+    fn init(&self) -> () {
+        // let token_name = "hiro";
+        // let token_supply = 1000u16;
+        // let
+        // self.init_token(token_supply,token_name,)
+    }
+
+
+    fn init_lottery(
         &self, 
         token_id: TokenIdentifier, 
         num_participants: usize, 

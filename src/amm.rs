@@ -3,10 +3,10 @@
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
 
-#[multiversx_sc::contract]
-pub trait AutomatedMarketMaker {
-    #[init]
-    fn init(
+#[multiversx_sc::module]
+pub trait LotteryAMM {
+
+    fn init_amm(
         &self,
         custom_token_id: TokenIdentifier,
         fee_percent: u64
@@ -20,8 +20,8 @@ pub trait AutomatedMarketMaker {
         self.token_reserve().set(&BigUint::zero());
     }
 
-    #[upgrade]
-    fn upgrade(&self) {}
+    // #[upgrade]
+    // fn upgrade(&self) {}
 
     // Add liquidity with EGLD and custom token
     #[payable("EGLD")]
