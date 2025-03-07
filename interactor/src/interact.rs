@@ -22,8 +22,11 @@ pub async fn lottery_cli() {
     let mut interact = ContractInteract::new(config).await;
 
 
+    let mut _arg = || -> Option<String> {
+        args.next()
+    };
     let mut arg = || -> String {
-        args.next().expect("expected argument")
+        _arg().expect("expected argument")
     };
 
     let mut get_addr = || -> Bech32Address{
