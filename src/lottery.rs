@@ -9,7 +9,7 @@ use multiversx_sc::imports::*;
 #[multiversx_sc::contract]
 pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
     #[init]
-    fn init(&self) -> () {
+    fn init(&self, num_participants: usize) -> () {
         // Default token information
         let token_name = ManagedBuffer::from("LotteryToken");
         let token_ticker = ManagedBuffer::from("LTRY");
@@ -29,7 +29,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         self.init_amm(token_id.clone(), fee_percent);
 
         // Default lottery settings
-        let num_participants = 1usize;
+        // let num_participants = 1usize;
         let bet_amount = BigUint::from(10u64);
 
         // Initialize lottery
@@ -94,7 +94,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
 
         // If all participants have joined, draw the winner
         if participants.len() == self.num_participants().get() {
-            self.draw_winner(current_game_id, participants);
+            // self.draw_winner(current_game_id);
         }
     }
 
@@ -108,7 +108,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         (game_active, current_participants, num_participants).into()
     }
 
-    fn draw_winner(&self, game_id: u32, participants: VecMapper<Self::Api, ManagedAddress<Self::Api>>) {
+    fn draw_winner(&self, game_id: u32) {
         sc_print!("draw winner:{}",game_id);
         // Generate random number (0-9)
         let mut rand_source = RandomnessSource::new();
@@ -119,7 +119,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         self.winning_number(&game_id).set(random_number);
 
         // Find winners
-        // let participants = self.participants(&game_id);
+        let participants = self.participants(&game_id);
         let mut winners = ManagedVec::new() as ManagedVec<ManagedAddress>;
 
         // for participant in participants.iter() {
