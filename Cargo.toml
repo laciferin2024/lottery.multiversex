@@ -1,6 +1,3 @@
-
-
-
 [workspace]
 members = ["meta", "interactor", "lotterytoken", "lotteryamm", "lottery"]
 
