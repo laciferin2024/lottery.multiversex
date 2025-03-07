@@ -19,7 +19,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         self.init_token(initial_supply.clone(), token_name, token_ticker.clone());
 
         // Get token ID (using the ticker as an approximation since we're creating the token in-contract)
-        let token_id = TokenIdentifier::from_esdt_bytes(token_ticker);
+        let token_id = TokenIdentifier::from_esdt_bytes("LTRY-94ac38");
         // let token_id = TokenIdentifier::from_esdt_bytes(self.token_ticker());
 
         // Default AMM settings

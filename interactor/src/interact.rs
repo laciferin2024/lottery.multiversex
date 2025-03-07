@@ -35,6 +35,8 @@ pub async fn lottery_cli() {
         let address = _arg();
         if address.is_some() {
             let address = Bech32Address::from_bech32_string(address.unwrap());
+
+            dbg!("Address from Bech32: {}", address.clone());
             return address;
         }
 
@@ -42,6 +44,7 @@ pub async fn lottery_cli() {
         // let address = arg();
         let address = interact.wallet_address.clone();
         let address = Bech32Address::from_bech32_string(encode(&address));
+        dbg!("Wallet Address: {}", address.clone());
         address
     };
 
@@ -193,9 +196,11 @@ impl ContractInteract {
 
     pub async fn place_bet(&mut self, chosen_number: u8) {
         let token_id = self.token_id().await;
-        let token_nonce = 1u64;
+        let token_nonce = 0u64;
 
         let token_amount = self.bet_amount().await;
+
+        // let token_amount = BigUint::from(0u64);
         let token_amount = BigUint::<StaticApi>::from(token_amount);
 
         dbg!("token_amt: {}",token_amount.clone().to_u64());
