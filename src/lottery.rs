@@ -89,7 +89,6 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
             .set(chosen_number);
         self.has_placed_bet(&current_game_id, &caller).set(true);
 
-
         let participants = self.participants(&current_game_id);
 
         // If all participants have joined, draw the winner
@@ -109,7 +108,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
     }
 
     fn draw_winner(&self, game_id: u32) {
-        sc_print!("draw winner:{}",game_id);
+        sc_print!("draw winner:{}", game_id);
         // Generate random number (0-9)
         let mut rand_source = RandomnessSource::new();
 
@@ -158,12 +157,8 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
             let half_bet_amount = &self.bet_amount().get() / 2u32; //FIXME: 50% penality
 
             for participant in participants.iter() {
-                self.send().direct_esdt(
-                    &participant,
-                    &self.token_id().get(),
-                    0,
-                    &half_bet_amount,
-                );
+                self.send()
+                    .direct_esdt(&participant, &self.token_id().get(), 0, &half_bet_amount);
             }
         }
 
@@ -184,11 +179,9 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
     #[storage_mapper("betAmount")]
     fn bet_amount(&self) -> SingleValueMapper<BigUint>;
 
-
     #[view]
     #[storage_mapper("gameActive")]
     fn game_active(&self) -> SingleValueMapper<bool>;
-
 
     #[view]
     #[storage_mapper("currentGameId")]
