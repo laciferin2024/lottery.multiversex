@@ -7,6 +7,7 @@ use config::Config;
 use multiversx_sc_snippets::imports::*;
 use serde::{Deserialize, Serialize};
 use std::{io::{Read, Write}, panic, path::Path};
+use std::cell::RefCell;
 use bech32::{encode};
 
 
@@ -15,22 +16,23 @@ const STATE_FILE: &str = "state.toml";
 pub async fn lottery_cli() {
     env_logger::init();
 
-    let mut args = std::env::args();
-    let _ = args.next();
-    let cmd = args.next().expect("at least one argument required");
+    let mut args = RefCell::new(std::env::args().skip(1)); //program name
+
+    let _arg = || -> Option<String> {
+        args.borrow_mut().next()
+    };
+
+    let cmd = _arg().expect("at least one argument required");
     let config = Config::new();
     let mut interact = ContractInteract::new(config).await;
 
-
-    let mut _arg = || -> Option<String> {
-        args.next()
-    };
-    let mut arg = || -> String {
+    let arg = || -> String {
         _arg().expect("expected argument")
     };
 
+
     let mut get_addr = || -> Bech32Address{
-        let address = args.next();
+        let address = _arg();
         if address.is_some() {
             let address = Bech32Address::from_bech32_string(address.unwrap());
             return address;
