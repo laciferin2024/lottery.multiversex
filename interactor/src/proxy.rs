@@ -102,6 +102,33 @@ where
             .original_result()
     }
 
+    pub fn token_id(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, TokenIdentifier<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("token_id")
+            .original_result()
+    }
+
+    pub fn num_participants(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, usize> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("num_participants")
+            .original_result()
+    }
+
+    pub fn bet_amount(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, BigUint<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("bet_amount")
+            .original_result()
+    }
+
     pub fn mint<
         Arg0: ProxyArg<ManagedAddress<Env::Api>>,
         Arg1: ProxyArg<BigUint<Env::Api>>,

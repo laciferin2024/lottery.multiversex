@@ -157,12 +157,15 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
     }
 
     // Storage mappers
+    #[view]
     #[storage_mapper("tokenId")]
     fn token_id(&self) -> SingleValueMapper<TokenIdentifier>;
 
+    #[view]
     #[storage_mapper("numParticipants")]
     fn num_participants(&self) -> SingleValueMapper<usize>;
 
+    #[view]
     #[storage_mapper("betAmount")]
     fn bet_amount(&self) -> SingleValueMapper<BigUint>;
 

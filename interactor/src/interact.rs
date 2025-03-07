@@ -10,6 +10,8 @@ use std::{
     io::{Read, Write},
     path::Path,
 };
+use bech32::{encode};
+
 
 const STATE_FILE: &str = "state.toml";
 
@@ -20,7 +22,6 @@ pub async fn lottery_cli() {
     let _ = args.next();
     let cmd = args.next().expect("at least one argument required");
     let config = Config::new();
-
     let mut interact = ContractInteract::new(config).await;
 
 
@@ -29,8 +30,10 @@ pub async fn lottery_cli() {
     };
 
     let mut get_addr = || -> Bech32Address{
-        let address = arg();
-        let address = Bech32Address::from_bech32_string(address);
+        // let address = arg();
+        // let address = Bech32Address::from_bech32_string(address);
+        let address = interact.wallet_address.clone();
+        let address = Bech32Address::from_bech32_string(encode(&address));
         address
     };
 
@@ -45,11 +48,14 @@ pub async fn lottery_cli() {
         "mint" => {
             interact.mint(get_addr(), 1000u128).await
         }
-        "burn" => interact.burn().await,
-        "transfer" => interact.transfer().await,
         "getTokenBalance" => {
             interact.get_token_balance(get_addr()).await
         }
+        "token_id" => interact.token_id().await,
+        "num_participants" => interact.num_participants().await,
+        "bet_amount" => interact.bet_amount().await,
+        "burn" => interact.burn().await,
+        "transfer" => interact.transfer().await,
         "getTokenSupply" => interact.get_token_supply().await,
         "add_liquidity_egld" => interact.add_liquidity_egld().await,
         "remove_liquidity" => interact.remove_liquidity().await,
@@ -174,8 +180,8 @@ impl ContractInteract {
     pub async fn place_bet(&mut self, chosen_number: u8) {
         let token_id = String::new();
         let token_nonce = 0u64;
-
         let token_amount = BigUint::<StaticApi>::from(0u128);
+
 
         let response = self
             .interactor
@@ -200,6 +206,48 @@ impl ContractInteract {
             .to(self.state.current_address())
             .typed(proxy::LotteryProxy)
             .get_game_status()
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {result_value:?}");
+    }
+
+    pub async fn token_id(&mut self) {
+        let result_value = self
+            .interactor
+            .query()
+            .to(self.state.current_address())
+            .typed(proxy::LotteryProxy)
+            .token_id()
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {result_value:?}");
+    }
+
+    pub async fn num_participants(&mut self) {
+        let result_value = self
+            .interactor
+            .query()
+            .to(self.state.current_address())
+            .typed(proxy::LotteryProxy)
+            .num_participants()
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {result_value:?}");
+    }
+
+    pub async fn bet_amount(&mut self) {
+        let result_value = self
+            .interactor
+            .query()
+            .to(self.state.current_address())
+            .typed(proxy::LotteryProxy)
+            .bet_amount()
             .returns(ReturnsResultUnmanaged)
             .run()
             .await;
@@ -399,3 +447,4 @@ impl ContractInteract {
         println!("Result: {result_value:?}");
     }
 }
+
