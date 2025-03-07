@@ -1,0 +1,21 @@
+[package]
+name = "lottery"
+version = "0.0.1"
+publish = false
+edition = "2021"
+authors = ["Hiro <laciferin@gmail.com>"]
+
+[package.metadata]
+required-tools = ["wasm-opt", "rustup", "cargo"]
+
+[build]
+target = "wasm32-unknown-unknown"
+
+[lib]
+path = "src/lottery.rs"
+
+[dependencies.multiversx-sc]
+version = "0.56.1"
+
+[dev-dependencies.multiversx-sc-scenario]
+version = "0.56.1"

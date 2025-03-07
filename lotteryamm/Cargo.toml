@@ -1,0 +1,12 @@
+[package]
+name = "lotteryamm"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[dependencies.multiversx-sc]
+version = "0.56.1"
+
+[lib]
+path = "src/amm.rs"

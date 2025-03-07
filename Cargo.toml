@@ -1,31 +1,8 @@
-[package]
-name = "lottery"
-version = "0.0.1"
-publish = false
-edition = "2021"
-authors = ["Hiro <laciferin@gmail.com>"]
-
-[build]
-target = "wasm32-unknown-unknown"
 
 
-[package.metadata]
-required-tools = ["wasm-opt", "rustup", "cargo"]
-
-[lib]
-path = "src/lottery.rs"
-
-[dependencies.multiversx-sc]
-version = "0.56.1"
-
-[dev-dependencies]
-num-bigint = "0.4"
-
-[dev-dependencies.multiversx-sc-scenario]
-version = "0.56.1"
 
 [workspace]
-members = [".", "meta", "interactor", "lotterytoken"]
+members = ["meta", "interactor", "lotterytoken", "lotteryamm", "lottery"]
 
 
 [profile.release]

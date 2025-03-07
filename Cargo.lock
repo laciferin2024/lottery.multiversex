@@ -1062,6 +1062,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "lotteryamm"
+version = "0.1.0"
+dependencies = [
+ "multiversx-sc",
+]
+
+[[package]]
 name = "lotterytoken"
 version = "0.1.0"
 dependencies = [
