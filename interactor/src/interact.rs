@@ -6,10 +6,7 @@ mod proxy;
 use config::Config;
 use multiversx_sc_snippets::imports::*;
 use serde::{Deserialize, Serialize};
-use std::{
-    io::{Read, Write},
-    path::Path,
-};
+use std::{io::{Read, Write}, panic, path::Path};
 use bech32::{encode};
 
 
@@ -25,13 +22,19 @@ pub async fn lottery_cli() {
     let mut interact = ContractInteract::new(config).await;
 
 
-    let mut arg = || -> String{
+    let mut arg = || -> String {
         args.next().expect("expected argument")
     };
 
     let mut get_addr = || -> Bech32Address{
+        let address = args.next();
+        if address.is_some() {
+            let address = Bech32Address::from_bech32_string(address.unwrap());
+            return address;
+        }
+
+
         // let address = arg();
-        // let address = Bech32Address::from_bech32_string(address);
         let address = interact.wallet_address.clone();
         let address = Bech32Address::from_bech32_string(encode(&address));
         address
