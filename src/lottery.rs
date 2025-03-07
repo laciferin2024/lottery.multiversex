@@ -154,13 +154,15 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
                     .direct_esdt(&winner, &self.token_id().get(), 0, &prize_per_winner);
             }
         } else {
-            // No winners, return tokens to players
+            // No winners, return half of the tokens to players
+            let half_bet_amount = &self.bet_amount().get() / 2u32; //FIXME: 50% penality
+
             for participant in participants.iter() {
                 self.send().direct_esdt(
                     &participant,
                     &self.token_id().get(),
                     0,
-                    &self.bet_amount().get(),
+                    &half_bet_amount,
                 );
             }
         }
