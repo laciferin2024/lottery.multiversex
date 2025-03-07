@@ -3,8 +3,10 @@
 mod amm;
 mod token;
 
+use core::clone::Clone;
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
+use crate::__wasm__endpoints__::current_game_id;
 
 #[multiversx_sc::contract]
 pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
@@ -61,17 +63,18 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         // Check if the bet number is valid (0-9)
         require!(chosen_number <= 9, "Number must be between 0 and 9");
 
-        // Get payment info
-        let payment = self.call_value().single_esdt();
+
+        let (payment_token, payment_amount) = self.call_value().egld_or_single_fungible_esdt();
+
         let token_id = self.token_id().get();
         let bet_amount = self.bet_amount().get();
 
         // Validate payment
         require!(
-            payment.token_identifier == token_id,
+            payment_token == token_id,
             "Wrong token used for payment"
         );
-        require!(payment.amount == bet_amount, "Wrong amount sent for bet");
+        require!(payment_amount == bet_amount, "Wrong amount sent for bet");
 
         // Get caller
         let caller = self.blockchain().get_caller();
@@ -88,6 +91,8 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         self.player_numbers(&current_game_id, &caller)
             .set(chosen_number);
         self.has_placed_bet(&current_game_id, &caller).set(true);
+
+        self.bet_event(&caller, &current_game_id);
 
         let participants = self.participants(&current_game_id);
 
@@ -135,7 +140,8 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
             let player_number = self.player_numbers(&game_id, &participant).get();
 
             if player_number == random_number {
-                winners.push(participant);
+                winners.push(participant.clone());
+                self.winner_event(&participant, &game_id)
             }
         }
 
@@ -200,4 +206,14 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
 
     #[storage_mapper("winningNumber")]
     fn winning_number(&self, game_id: &u32) -> SingleValueMapper<u8>;
+
+
+    // events
+
+    #[event("betEvent")]
+    fn bet_event(&self, #[indexed] user: &ManagedAddress, #[indexed] game_id: &u32);
+
+
+    #[event("winnerEvent")]
+    fn winner_event(&self, #[indexed] user: &ManagedAddress, #[indexed] game_id: &u32);
 }
