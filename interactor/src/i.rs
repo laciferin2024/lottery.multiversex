@@ -66,7 +66,7 @@ impl ContractInteract {
             .tx()
             .to(self.state.current_address())
             .from(&self.wallet_address)
-            .gas(30_000_000u64)
+            .gas(60_000_000u64)
             .typed(proxy::LotteryProxy)
             .upgrade(num_participants, token_id, bet_amount)
             .code(&self.contract_code)
