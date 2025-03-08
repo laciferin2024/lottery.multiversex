@@ -12,3 +12,9 @@ fn world() -> ScenarioWorld {
 fn lottery_rs() {
     world().run("scenarios/lottery.scen.json");
 }
+
+
+#[test]
+fn lottery_init_rs() {
+    world().run("scenarios/lottery-init.scen.json");
+}
