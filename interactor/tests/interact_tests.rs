@@ -9,5 +9,5 @@ use rust_interact::{config::Config, ContractInteract};
 async fn deploy_test_lottery() {
     let mut interactor = ContractInteract::new(Config::new()).await;
 
-    interactor.deploy(1).await;
+    interactor.deploy().await;
 }

@@ -3,6 +3,7 @@
 pub mod config;
 mod i;
 mod proxy;
+mod interact_cli;
 
 use bech32::encode;
 use config::Config;
@@ -14,6 +15,7 @@ use std::{
     panic,
     path::Path,
 };
+use lottery::__wasm__endpoints__::token_id;
 
 const STATE_FILE: &str = "state.toml";
 
@@ -49,7 +51,16 @@ pub async fn lottery_cli() {
     match cmd.as_str() {
         "deploy" => {
             let num_participants = _arg().unwrap_or("1".to_string()).parse::<usize>().unwrap();
-            interact.deploy(num_participants).await;
+            let token_id_str = _arg().unwrap_or("EGLD".to_string());
+
+            let token_id = if token_id_str == "EGLD" {
+                EgldOrEsdtTokenIdentifier::egld()
+            } else {
+                EgldOrEsdtTokenIdentifier::from(ManagedBuffer::from(token_id_str))
+            };
+            // let token_id = ManagedBuffer::from(token_id);
+
+            interact.deploy(num_participants, multiversx_sc::imports::OptionalValue::Some(token_id)).await;
         }
         "upgrade" => interact.upgrade().await,
         "place_bet" => {
@@ -85,8 +96,6 @@ pub async fn lottery_cli() {
         "getLpBalance" => interact.get_lp_balance().await,
         _ => panic!("unknown command: {}", &cmd),
     }
-
-    return;
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -137,59 +146,6 @@ pub struct ContractInteract {
 }
 
 impl ContractInteract {
-    pub async fn new(config: Config) -> Self {
-        let mut interactor = Interactor::new(config.gateway_uri())
-            .await
-            .use_chain_simulator(config.use_chain_simulator());
-        // .with_tracer("trace1.scen.json");
-
-        interactor.set_current_dir_from_workspace("lottery");
-
-        let wallet = Wallet::from_pem_file("../wallet/hiro.pem").expect("wallet not found");
-
-        // wallet = test_wallets::alice();
-
-        let wallet_address = interactor.register_wallet(wallet).await;
-
-        println!("wallet: {:?}", wallet_address);
-
-        // Useful in the chain simulator setting
-        // generate blocks until ESDTSystemSCAddress is enabled
-        interactor.generate_blocks_until_epoch(1).await.unwrap();
-
-        let contract_code = BytesValue::interpret_from(
-            "mxsc:../output/lottery.mxsc.json",
-            &InterpreterContext::default(),
-        );
-
-        ContractInteract {
-            interactor,
-            wallet_address,
-            contract_code,
-            state: State::load_state(),
-        }
-    }
-
-    pub async fn deploy(&mut self, num_participants: usize) {
-        let new_address = self
-            .interactor
-            .tx()
-            .from(&self.wallet_address)
-            .gas(30_000_000u64)
-            .typed(proxy::LotteryProxy)
-            .init(num_participants)
-            .code(&self.contract_code)
-            .returns(ReturnsNewAddress)
-            .run()
-            .await;
-        let new_address_bech32 = bech32::encode(&new_address);
-        self.state.set_address(Bech32Address::from_bech32_string(
-            new_address_bech32.clone(),
-        ));
-
-        println!("new address: {new_address_bech32}");
-    }
-
     pub async fn upgrade(&mut self) {
         let response = self
             .interactor

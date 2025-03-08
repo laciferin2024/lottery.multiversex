@@ -45,14 +45,17 @@ where
 {
     pub fn init<
         Arg0: ProxyArg<usize>,
+        Arg1: ProxyArg<OptionalValue<EgldOrEsdtTokenIdentifier<Env::Api>>>,
     >(
         self,
         num_participants: Arg0,
+        opt_token_id: Arg1,
     ) -> TxTypedDeploy<Env, From, NotPayable, Gas, ()> {
         self.wrapped_tx
             .payment(NotPayable)
             .raw_deploy()
             .argument(&num_participants)
+            .argument(&opt_token_id)
             .original_result()
     }
 }
@@ -108,7 +111,7 @@ where
 
     pub fn token_id(
         self,
-    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, TokenIdentifier<Env::Api>> {
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, EgldOrEsdtTokenIdentifier<Env::Api>> {
         self.wrapped_tx
             .payment(NotPayable)
             .raw_call("token_id")
