@@ -77,7 +77,7 @@ pub async fn lottery_cli() {
                 EgldOrEsdtTokenIdentifier::from(ManagedBuffer::from(token_id_str))
             };
 
-            interact.upgrade(num_participants, OptionalValue::Some(token_id), OptionalValue::Some(bet_amount.unwrap())).await;
+            interact.upgrade(OptionalValue::Some(num_participants), OptionalValue::Some(token_id), OptionalValue::Some(bet_amount.unwrap())).await;
         }
         "place_bet" => {
             let no = arg();

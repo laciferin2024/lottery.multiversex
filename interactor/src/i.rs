@@ -60,7 +60,7 @@ impl ContractInteract {
         println!("new address: {new_address_bech32}");
     }
 
-    pub async fn upgrade(&mut self, num_participants: usize, token_id: OptionalValue<EgldOrEsdtTokenIdentifier<StaticApi>>, bet_amount: OptionalValue<BigUint<StaticApi>>) {
+    pub async fn upgrade(&mut self, num_participants: OptionalValue<usize>, token_id: OptionalValue<EgldOrEsdtTokenIdentifier<StaticApi>>, bet_amount: OptionalValue<BigUint<StaticApi>>) {
         let response = self
             .interactor
             .tx()

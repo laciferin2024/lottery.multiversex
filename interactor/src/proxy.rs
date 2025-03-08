@@ -73,20 +73,20 @@ where
     Gas: TxGas<Env>,
 {
     pub fn upgrade<
-        Arg0: ProxyArg<OptionalValue<EgldOrEsdtTokenIdentifier<Env::Api>>>,
-        Arg1: ProxyArg<OptionalValue<usize>>,
+        Arg0: ProxyArg<OptionalValue<usize>>,
+        Arg1: ProxyArg<OptionalValue<EgldOrEsdtTokenIdentifier<Env::Api>>>,
         Arg2: ProxyArg<OptionalValue<BigUint<Env::Api>>>,
     >(
         self,
-        token_id: Arg0,
-        num_participants: Arg1,
+        num_participants: Arg0,
+        token_id: Arg1,
         bet_amount: Arg2,
     ) -> TxTypedUpgrade<Env, From, To, NotPayable, Gas, ()> {
         self.wrapped_tx
             .payment(NotPayable)
             .raw_upgrade()
-            .argument(&token_id)
             .argument(&num_participants)
+            .argument(&token_id)
             .argument(&bet_amount)
             .original_result()
     }
