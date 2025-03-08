@@ -3,7 +3,7 @@ use crate::{proxy, ContractInteract, State};
 use multiversx_sc::imports::{BigUint, EgldOrEsdtTokenIdentifier, OptionalValue, ReturnsNewAddress, ReturnsResultUnmanaged, TokenIdentifier};
 use multiversx_sc::types::BigInt;
 use multiversx_sc_snippets::imports::{bech32, Bech32Address, BytesValue, DebugApi, InterpretableFrom, InterpreterContext, StaticApi, Wallet};
-use multiversx_sc_snippets::{Interactor, InteractorRunAsync};
+use multiversx_sc_snippets::{test_wallets, Interactor, InteractorRunAsync};
 use crate::config::Config;
 
 impl ContractInteract {
@@ -15,9 +15,9 @@ impl ContractInteract {
 
         interactor.set_current_dir_from_workspace("lottery");
 
-        let wallet = Wallet::from_pem_file("../wallet/hiro.pem").expect("wallet not found");
+        // let wallet = Wallet::from_pem_file("../wallet/hiro.pem").expect("wallet not found");
 
-        // wallet = test_wallets::alice();
+        let wallet = test_wallets::alice();
 
         let wallet_address = interactor.register_wallet(wallet).await;
 
@@ -45,9 +45,9 @@ impl ContractInteract {
             .interactor
             .tx()
             .from(&self.wallet_address)
-            .gas(30_000_000u64)
+            .gas(60_000_000u64)
             .typed(proxy::LotteryProxy)
-            .init(num_participants, token_id)
+            .init(2 as usize, token_id)
             .code(&self.contract_code)
             .returns(ReturnsNewAddress)
             .run()

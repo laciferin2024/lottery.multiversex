@@ -51,7 +51,7 @@ pub async fn lottery_cli() {
     match cmd.as_str() {
         "deploy" => {
             let num_participants = _arg().unwrap_or("1".to_string()).parse::<usize>().unwrap();
-            let token_id_str = _arg().unwrap_or("EGLD".to_string());
+            let token_id_str = _arg().unwrap_or("LTRY-94ac38".to_string());
 
             let token_id = if token_id_str == "EGLD" {
                 EgldOrEsdtTokenIdentifier::egld()

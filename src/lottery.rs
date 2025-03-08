@@ -103,7 +103,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
 
         // If all participants have joined, draw the winner
         if participants.len() == self.num_participants().get() {
-            self.draw_winner(current_game_id);
+            self.draw_winner(current_game_id, participants);
         }
     }
 
@@ -117,7 +117,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         (game_active, current_participants, num_participants).into()
     }
 
-    fn draw_winner(&self, game_id: u32) {
+    fn draw_winner(&self, game_id: u32, participants: VecMapper<Self::Api, ManagedAddress<Self::Api>>) {
         sc_print!("draw winner:{}", game_id);
         // Generate random number (0-9)
         let mut rand_source = RandomnessSource::new();
@@ -128,20 +128,10 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         self.winning_number(&game_id).set(random_number);
 
         // Find winners
-        let participants = self.participants(&game_id);
+        // let participants = self.participants(&game_id);
         let mut winners = ManagedVec::new() as ManagedVec<ManagedAddress>;
 
-        // for participant in participants.iter() {
-        //     let player_number = self.player_numbers(&game_id, &participant).get();
-        //
-        //     if player_number == random_number {
-        //         winners.push(participant);
-        //     }
-        // }
-
-        for i in 0..participants.len() {
-            // FIXME: u can't do this as participants.get is fetching from blockchain but this is being called
-            let participant = participants.get(i);
+        for participant in participants.iter() {
             let player_number = self.player_numbers(&game_id, &participant).get();
 
             if player_number == random_number {
@@ -149,6 +139,17 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
                 self.winner_event(&participant, &game_id)
             }
         }
+
+        // for i in 0..participants.len() {
+        //     // FIXME: u can't do this as participants.get is fetching from blockchain but this is being called
+        //     let participant = participants.get(i);
+        //     let player_number = self.player_numbers(&game_id, &participant).get();
+        //
+        //     if player_number == random_number {
+        //         winners.push(participant.clone());
+        //         self.winner_event(&participant, &game_id)
+        //     }
+        // }
 
         // Calculate rewards
         let total_pot = &self.bet_amount().get() * &BigUint::from(participants.len());
@@ -163,6 +164,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
                 // self.send()
                 //     .direct_esdt(&winner, &self.token_id().get(), 0, &prize_per_winner);
                 self.send().direct(&winner, &self.token_id().get(), 0, &prize_per_winner);
+                self.winner_event(&winner, &game_id);
             }
         } else {
             // No winners, return the tokens to players
