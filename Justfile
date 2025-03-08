@@ -20,6 +20,11 @@ nonce := "0"
 build *ARGS:
     {{ mx }} all build {{ ARGS }}
 
+setup:
+    mx install all
+
+#    installs all test gen deps
+
 wallet:
     {{ mx }} wallet new --format pem --outfile ./wallet/hiro.pem
 

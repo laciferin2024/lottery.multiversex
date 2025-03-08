@@ -48,7 +48,7 @@ pub async fn lottery_cli() {
 
     match cmd.as_str() {
         "deploy" => {
-            let num_participants = arg().parse::<usize>().unwrap();
+            let num_participants = _arg().unwrap_or("1".to_string()).parse::<usize>().unwrap();
             interact.deploy(num_participants).await;
         }
         "upgrade" => interact.upgrade().await,
@@ -144,7 +144,14 @@ impl ContractInteract {
         // .with_tracer("trace1.scen.json");
 
         interactor.set_current_dir_from_workspace("lottery");
-        let wallet_address = interactor.register_wallet(test_wallets::alice()).await;
+
+        let wallet = Wallet::from_pem_file("../wallet/hiro.pem").expect("wallet not found");
+
+        // wallet = test_wallets::alice();
+
+        let wallet_address = interactor.register_wallet(wallet).await;
+
+        println!("wallet: {:?}", wallet_address);
 
         // Useful in the chain simulator setting
         // generate blocks until ESDTSystemSCAddress is enabled

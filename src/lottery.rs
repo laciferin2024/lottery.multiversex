@@ -3,30 +3,37 @@
 mod amm;
 mod token;
 
+use core::clone::Clone;
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
 
 #[multiversx_sc::contract]
 pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
     #[init]
-    fn init(&self, num_participants: usize) -> () {
+    fn init(&self, num_participants: usize, opt_token_id: OptionalValue<EgldOrEsdtTokenIdentifier>) -> () {
         // Default token information
         let token_name = ManagedBuffer::from("LotteryToken");
         let token_ticker = ManagedBuffer::from("LTRY");
         let initial_supply = BigUint::from(1_000_000u64);
 
         // Initialize token module
-        self.init_token(initial_supply.clone(), token_name, token_ticker.clone());
+        self.init_token(initial_supply.clone(), token_name, token_ticker.clone()); //TODO: inbuilt token system and AMM
+
+
+        let token_id = match opt_token_id {
+            OptionalValue::Some(t) => t,
+            OptionalValue::None => EgldOrEsdtTokenIdentifier::egld(),
+        };
 
         // Get token ID (using the ticker as an approximation since we're creating the token in-contract)
-        let token_id = TokenIdentifier::from_esdt_bytes("LTRY-94ac38");
+        // let token_id = TokenIdentifier::from_esdt_bytes("LTRY-94ac38");
         // let token_id = TokenIdentifier::from_esdt_bytes(self.token_ticker());
 
         // Default AMM settings
         let fee_percent = 30u64; // 0.3% fee
 
         // Initialize AMM module
-        self.init_amm(token_id.clone(), fee_percent);
+        // self.init_amm(token_id, fee_percent); //FIXME: init amm
 
         // Default lottery settings
         // let num_participants = 1usize;
@@ -38,7 +45,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
 
     fn init_lottery(
         &self,
-        token_id: TokenIdentifier,
+        token_id: EgldOrEsdtTokenIdentifier,
         num_participants: usize,
         bet_amount: BigUint,
     ) {
@@ -61,17 +68,18 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         // Check if the bet number is valid (0-9)
         require!(chosen_number <= 9, "Number must be between 0 and 9");
 
-        // Get payment info
-        let payment = self.call_value().single_esdt();
+
+        let (payment_token, payment_amount) = self.call_value().egld_or_single_fungible_esdt();
+
         let token_id = self.token_id().get();
         let bet_amount = self.bet_amount().get();
 
         // Validate payment
         require!(
-            payment.token_identifier == token_id,
+            payment_token == token_id,
             "Wrong token used for payment"
         );
-        require!(payment.amount == bet_amount, "Wrong amount sent for bet");
+        require!(payment_amount == bet_amount, "Wrong amount sent for bet");
 
         // Get caller
         let caller = self.blockchain().get_caller();
@@ -88,6 +96,8 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         self.player_numbers(&current_game_id, &caller)
             .set(chosen_number);
         self.has_placed_bet(&current_game_id, &caller).set(true);
+
+        self.bet_event(&caller, &current_game_id);
 
         let participants = self.participants(&current_game_id);
 
@@ -135,7 +145,8 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
             let player_number = self.player_numbers(&game_id, &participant).get();
 
             if player_number == random_number {
-                winners.push(participant);
+                winners.push(participant.clone());
+                self.winner_event(&participant, &game_id)
             }
         }
 
@@ -149,16 +160,19 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
 
             for winner in winners.iter() {
                 // Send tokens to winner
-                self.send()
-                    .direct_esdt(&winner, &self.token_id().get(), 0, &prize_per_winner);
+                // self.send()
+                //     .direct_esdt(&winner, &self.token_id().get(), 0, &prize_per_winner);
+                self.send().direct(&winner, &self.token_id().get(), 0, &prize_per_winner);
             }
         } else {
-            // No winners, return half of the tokens to players
-            let half_bet_amount = &self.bet_amount().get() / 2u32; //FIXME: 50% penality
+            // No winners, return the tokens to players
+            let consolation_share = total_pot / participants.len() as u32;
 
             for participant in participants.iter() {
-                self.send()
-                    .direct_esdt(&participant, &self.token_id().get(), 0, &half_bet_amount);
+                // self.send()
+                //     .direct_esdt(&participant, &self.token_id().get(), 0, &half_bet_amount);
+
+                self.send().direct(&participant, &self.token_id().get(), 0, &consolation_share);
             }
         }
 
@@ -169,7 +183,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
     // Storage mappers
     #[view]
     #[storage_mapper("tokenId")]
-    fn token_id(&self) -> SingleValueMapper<TokenIdentifier>;
+    fn token_id(&self) -> SingleValueMapper<EgldOrEsdtTokenIdentifier>;
 
     #[view]
     #[storage_mapper("numParticipants")]
@@ -200,4 +214,14 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
 
     #[storage_mapper("winningNumber")]
     fn winning_number(&self, game_id: &u32) -> SingleValueMapper<u8>;
+
+
+    // events
+
+    #[event("betEvent")]
+    fn bet_event(&self, #[indexed] user: &ManagedAddress, #[indexed] game_id: &u32);
+
+
+    #[event("winnerEvent")]
+    fn winner_event(&self, #[indexed] user: &ManagedAddress, #[indexed] game_id: &u32);
 }

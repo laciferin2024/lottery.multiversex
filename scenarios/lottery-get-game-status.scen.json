@@ -1,0 +1,25 @@
+{
+  "name": "lottery get game status test",
+  "gasSchedule": "v4",
+  "steps": [
+    {
+      "step": "externalSteps",
+      "path": "lottery-place-multiple-bets.scen.json"
+    },
+    {
+      "step": "scQuery",
+      "txId": "get-game-status",
+      "tx": {
+        "to": "sc:lottery",
+        "function": "getGameStatus",
+        "arguments": []
+      },
+      "expect": {
+        "status": "0",
+        "data": [
+          "true", "2", "3"
+        ]
+      }
+    }
+  ]
+}

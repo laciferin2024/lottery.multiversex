@@ -1,0 +1,81 @@
+{
+  "name": "lottery contract deployment test",
+  "gasSchedule": "v4",
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "0",
+          "balance": "1,000,000,000,000,000,000",
+          "storage": {}
+        },
+        "address:participant1": {
+          "nonce": "0",
+          "balance": "1,000,000,000,000,000,000",
+          "storage": {}
+        },
+        "address:participant2": {
+          "nonce": "0",
+          "balance": "1,000,000,000,000,000,000",
+          "storage": {}
+        },
+        "address:participant3": {
+          "nonce": "0",
+          "balance": "1,000,000,000,000,000,000",
+          "storage": {}
+        }
+      },
+      "newAddresses": [
+        {
+          "creatorAddress": "address:owner",
+          "creatorNonce": "0",
+          "newAddress": "sc:lottery"
+        }
+      ]
+    },
+    {
+      "step": "scDeploy",
+      "txId": "deploy",
+      "tx": {
+        "from": "address:owner",
+        "contractCode": "mxsc:../output/lottery.mxsc.json",
+        "value": "0",
+        "arguments": [
+          "3",
+          "str:EGLD"
+        ],
+        "gasLimit": "10,000,000",
+        "gasPrice": "0"
+      },
+      "expect": {
+        "status": "0",
+        "gas": "*",
+        "refund": "*"
+      }
+    },
+    {
+      "step": "checkState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "1",
+          "balance": "1,000,000,000,000,000,000",
+          "storage": {}
+        },
+        "sc:lottery": {
+          "nonce": "0",
+          "balance": "0",
+          "storage": {
+            "str:tokenId": "str:EGLD",
+            "str:numParticipants": "3",
+            "str:betAmount": "10",
+            "str:gameActive": "true",
+            "str:currentGameId": "1",
+            "+": ""
+          },
+          "code": "mxsc:../output/lottery.mxsc.json"
+        }
+      }
+    }
+  ]
+}
