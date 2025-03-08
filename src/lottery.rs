@@ -6,7 +6,6 @@ mod token;
 use core::clone::Clone;
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
-use crate::__wasm__endpoints__::current_game_id;
 
 #[multiversx_sc::contract]
 pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
