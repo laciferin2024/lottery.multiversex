@@ -7,6 +7,14 @@ use core::clone::Clone;
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
 
+
+fn get_or_default<T: Clone>(optional_value: OptionalValue<T>, default_value: T) -> T {
+    match optional_value {
+        OptionalValue::Some(value) => value,
+        OptionalValue::None => default_value.clone(),
+    }
+}
+
 #[multiversx_sc::contract]
 pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
     #[init]
@@ -56,8 +64,20 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         self.current_game_id().set(1);
     }
 
+
+    // Upgrade: args are optional and default the current contract fields
+
+    #[allow_multiple_var_args]
     #[upgrade]
-    fn upgrade(&self) {}
+    fn upgrade(&self, token_id: OptionalValue<EgldOrEsdtTokenIdentifier>,
+               num_participants: OptionalValue<usize>,
+               bet_amount: OptionalValue<BigUint>) {
+        let token_id = get_or_default(token_id, self.token_id().get());
+        let num_participants = get_or_default(num_participants, self.num_participants().get());
+        let bet_amount = get_or_default(bet_amount, self.bet_amount().get());
+
+        self.init_lottery(token_id, num_participants, bet_amount);
+    }
 
     #[payable("*")]
     #[endpoint]
