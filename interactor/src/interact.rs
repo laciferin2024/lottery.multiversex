@@ -52,6 +52,9 @@ pub async fn lottery_cli() {
         "deploy" => {
             let num_participants = _arg().unwrap_or("1".to_string()).parse::<usize>().unwrap();
             let token_id_str = _arg().unwrap_or("LTRY-94ac38".to_string());
+            let bet_amount_str = _arg().unwrap_or("".to_string());
+            let bet_amount = bet_amount_str.parse::<u64>().ok().map(BigUint::from);
+
 
             let token_id = if token_id_str == "EGLD" {
                 EgldOrEsdtTokenIdentifier::egld()
@@ -60,7 +63,7 @@ pub async fn lottery_cli() {
             };
             // let token_id = ManagedBuffer::from(token_id);
 
-            interact.deploy(num_participants, multiversx_sc::imports::OptionalValue::Some(token_id)).await;
+            interact.deploy(num_participants, multiversx_sc::imports::OptionalValue::Some(token_id), bet_amount.map(OptionalValue::from)).await;
         }
         "upgrade" => interact.upgrade().await,
         "place_bet" => {
@@ -146,24 +149,6 @@ pub struct ContractInteract {
 }
 
 impl ContractInteract {
-    pub async fn upgrade(&mut self) {
-        let response = self
-            .interactor
-            .tx()
-            .to(self.state.current_address())
-            .from(&self.wallet_address)
-            .gas(30_000_000u64)
-            .typed(proxy::LotteryProxy)
-            .upgrade()
-            .code(&self.contract_code)
-            .code_metadata(CodeMetadata::UPGRADEABLE)
-            .returns(ReturnsResultUnmanaged)
-            .run()
-            .await;
-
-        println!("Result: {response:?}");
-    }
-
     pub async fn get_game_status(&mut self) {
         let result_value = self
             .interactor
