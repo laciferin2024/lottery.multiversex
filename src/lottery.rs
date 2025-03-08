@@ -17,8 +17,9 @@ fn get_or_default<T: Clone>(optional_value: OptionalValue<T>, default_value: T) 
 
 #[multiversx_sc::contract]
 pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
+    #[allow_multiple_var_args]
     #[init]
-    fn init(&self, num_participants: usize, opt_token_id: OptionalValue<EgldOrEsdtTokenIdentifier>) -> () {
+    fn init(&self, num_participants: usize, opt_token_id: OptionalValue<EgldOrEsdtTokenIdentifier>, bet_amount: OptionalValue<BigUint>) -> () {
         // Default token information
         let token_name = ManagedBuffer::from("LotteryToken");
         let token_ticker = ManagedBuffer::from("LTRY");
@@ -45,7 +46,10 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
 
         // Default lottery settings
         // let num_participants = 1usize;
-        let bet_amount = BigUint::from(10u64);
+        let default_bet = BigUint::from(1u64); //10 's a lot for faucet
+
+        let bet_amount = get_or_default(bet_amount, default_bet);
+        let bet_amount = BigUint::from(bet_amount);
 
         // Initialize lottery
         self.init_lottery(token_id, num_participants, bet_amount);
@@ -69,8 +73,8 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
 
     #[allow_multiple_var_args]
     #[upgrade]
-    fn upgrade(&self, token_id: OptionalValue<EgldOrEsdtTokenIdentifier>,
-               num_participants: OptionalValue<usize>,
+    fn upgrade(&self, num_participants: OptionalValue<usize>, token_id: OptionalValue<EgldOrEsdtTokenIdentifier>,
+
                bet_amount: OptionalValue<BigUint>) {
         let token_id = get_or_default(token_id, self.token_id().get());
         let num_participants = get_or_default(num_participants, self.num_participants().get());

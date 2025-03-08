@@ -1,6 +1,6 @@
 use multiversx_sc::codec;
 use crate::{proxy, ContractInteract, State};
-use multiversx_sc::imports::{BigUint, EgldOrEsdtTokenIdentifier, OptionalValue, ReturnsNewAddress, ReturnsResultUnmanaged, TokenIdentifier};
+use multiversx_sc::imports::{BigUint, CodeMetadata, EgldOrEsdtTokenIdentifier, OptionalValue, ReturnsNewAddress, ReturnsResultUnmanaged, TokenIdentifier};
 use multiversx_sc::types::BigInt;
 use multiversx_sc_snippets::imports::{bech32, Bech32Address, BytesValue, DebugApi, InterpretableFrom, InterpreterContext, StaticApi, Wallet};
 use multiversx_sc_snippets::{test_wallets, Interactor, InteractorRunAsync};
@@ -40,14 +40,14 @@ impl ContractInteract {
         }
     }
 
-    pub async fn deploy(&mut self, num_participants: usize, token_id: OptionalValue<EgldOrEsdtTokenIdentifier<StaticApi>>) {
+    pub async fn deploy(&mut self, num_participants: usize, token_id: OptionalValue<EgldOrEsdtTokenIdentifier<StaticApi>>, bet_amount: OptionalValue<BigUint<StaticApi>>) {
         let new_address = self
             .interactor
             .tx()
             .from(&self.wallet_address)
             .gas(60_000_000u64)
             .typed(proxy::LotteryProxy)
-            .init(2 as usize, token_id)
+            .init(num_participants, token_id, bet_amount)
             .code(&self.contract_code)
             .returns(ReturnsNewAddress)
             .run()
@@ -58,6 +58,24 @@ impl ContractInteract {
         ));
 
         println!("new address: {new_address_bech32}");
+    }
+
+    pub async fn upgrade(&mut self, num_participants: usize, token_id: OptionalValue<EgldOrEsdtTokenIdentifier<StaticApi>>, bet_amount: OptionalValue<BigUint<StaticApi>>) {
+        let response = self
+            .interactor
+            .tx()
+            .to(self.state.current_address())
+            .from(&self.wallet_address)
+            .gas(30_000_000u64)
+            .typed(proxy::LotteryProxy)
+            .upgrade(num_participants, token_id, bet_amount)
+            .code(&self.contract_code)
+            .code_metadata(CodeMetadata::UPGRADEABLE)
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        println!("Result: {response:?}");
     }
 
     pub async fn place_bet(&mut self, chosen_number: u8) {

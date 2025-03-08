@@ -52,7 +52,7 @@ pub async fn lottery_cli() {
         "deploy" => {
             let num_participants = _arg().unwrap_or("1".to_string()).parse::<usize>().unwrap();
             let token_id_str = _arg().unwrap_or("LTRY-94ac38".to_string());
-            let bet_amount_str = _arg().unwrap_or("".to_string());
+            let bet_amount_str = _arg().unwrap_or("10".to_string());
             let bet_amount = bet_amount_str.parse::<u64>().ok().map(BigUint::from);
 
 
@@ -63,9 +63,22 @@ pub async fn lottery_cli() {
             };
             // let token_id = ManagedBuffer::from(token_id);
 
-            interact.deploy(num_participants, multiversx_sc::imports::OptionalValue::Some(token_id), bet_amount.map(OptionalValue::from)).await;
+            interact.deploy(num_participants, OptionalValue::Some(token_id), OptionalValue::Some(bet_amount.unwrap())).await;
         }
-        "upgrade" => interact.upgrade().await,
+        "upgrade" => {
+            let num_participants = _arg().unwrap_or("1".to_string()).parse::<usize>().unwrap();
+            let token_id_str = _arg().unwrap_or("LTRY-94ac38".to_string());
+            let bet_amount_str = _arg().unwrap_or("10".to_string());
+            let bet_amount = bet_amount_str.parse::<u64>().ok().map(BigUint::from);
+
+            let token_id = if token_id_str == "EGLD" {
+                EgldOrEsdtTokenIdentifier::egld()
+            } else {
+                EgldOrEsdtTokenIdentifier::from(ManagedBuffer::from(token_id_str))
+            };
+
+            interact.upgrade(num_participants, OptionalValue::Some(token_id), OptionalValue::Some(bet_amount.unwrap())).await;
+        }
         "place_bet" => {
             let no = arg();
             interact.place_bet(no.parse::<u8>().unwrap()).await

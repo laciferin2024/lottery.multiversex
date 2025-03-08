@@ -46,16 +46,19 @@ where
     pub fn init<
         Arg0: ProxyArg<usize>,
         Arg1: ProxyArg<OptionalValue<EgldOrEsdtTokenIdentifier<Env::Api>>>,
+        Arg2: ProxyArg<OptionalValue<BigUint<Env::Api>>>,
     >(
         self,
         num_participants: Arg0,
         opt_token_id: Arg1,
+        bet_amount: Arg2,
     ) -> TxTypedDeploy<Env, From, NotPayable, Gas, ()> {
         self.wrapped_tx
             .payment(NotPayable)
             .raw_deploy()
             .argument(&num_participants)
             .argument(&opt_token_id)
+            .argument(&bet_amount)
             .original_result()
     }
 }
@@ -69,12 +72,22 @@ where
     To: TxTo<Env>,
     Gas: TxGas<Env>,
 {
-    pub fn upgrade(
+    pub fn upgrade<
+        Arg0: ProxyArg<OptionalValue<EgldOrEsdtTokenIdentifier<Env::Api>>>,
+        Arg1: ProxyArg<OptionalValue<usize>>,
+        Arg2: ProxyArg<OptionalValue<BigUint<Env::Api>>>,
+    >(
         self,
+        token_id: Arg0,
+        num_participants: Arg1,
+        bet_amount: Arg2,
     ) -> TxTypedUpgrade<Env, From, To, NotPayable, Gas, ()> {
         self.wrapped_tx
             .payment(NotPayable)
             .raw_upgrade()
+            .argument(&token_id)
+            .argument(&num_participants)
+            .argument(&bet_amount)
             .original_result()
     }
 }
