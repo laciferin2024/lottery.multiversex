@@ -1,5 +1,5 @@
 {
-  "name": "empty",
+  "name": "lottery",
   "steps": [
     {
       "step": "setState",
