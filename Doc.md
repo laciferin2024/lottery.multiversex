@@ -4,34 +4,39 @@
 
 📜 **Mission:** [Mission.md](./Mission.md)
 
-## 1. Token Contract:
+---
 
-[LTRY-94ac38](https://devnet-explorer.multiversx.com/tokens/LTRY-94ac38)
+## 🚀 1. Token Contract
 
-## 2. Lottery Contract:
+🔗 **LTRY-94ac38:** [View on Explorer](https://devnet-explorer.multiversx.com/tokens/LTRY-94ac38)
 
-Find latest contract in `interactor/state.toml`
+---
 
-Mission
-Accomplished: [Tx](https://devnet-explorer.multiversx.com/transactions/49dd0c9d51dc78627d700bc2e23cfe9ef17d3e0b85b6ab1185405a8a9fe61e2d)
+## 🎲 2. Lottery Contract
 
-For the sake of simplicity I set num_participants to 1 and its working as in the above tx.
+📌 **Find latest contract in:** `interactor/state.toml`
 
-### TODO:
+✅ **Mission Accomplished:
+** [Transaction](https://devnet-explorer.multiversx.com/transactions/49dd0c9d51dc78627d700bc2e23cfe9ef17d3e0b85b6ab1185405a8a9fe61e2d)
 
-- Interactor tests with EGLD Token (would allow me to test with test_wallets)
-- Use Lottery Contract as Super Dapp with its own token[module]. Its integrated but need to verify the feasibility of
-  this solution
+> For simplicity, `num_participants` was set to `1`, and it works as shown in the above transaction.
 
-### 3. AMM
+### 🔧 TODO:
 
-- [x] Contract prototyped
+- [ ] Implement **Interactor tests with EGLD** (allows testing with `test_wallets`).
+- [ ] Use **Lottery Contract as a Super Dapp** with its own token module.
+    - ✅ Integrated, but feasibility needs verification.
 
-> I reckon there are some finer implementations of the same.
+---
 
-- [x] Supports liquidity with EGLD [src/amm.rs#L24](src/amm.rs#L24)
+## 💱 3. AMM
 
-### TODO:
+✅ **Contract Prototyped**
+> _There might be more refined implementations of the same._
 
-- [x] Tests with scenarios
-- [x] Write Integrate tests
+✅ **Supports Liquidity with EGLD:** [View Code](src/amm.rs#L24)
+
+### 🔧 TODO:
+
+- [x] **Tests with Scenarios**
+- [x] **Write Integration Tests**  
