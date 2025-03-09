@@ -46,7 +46,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
 
         // Default lottery settings
         // let num_participants = 1usize;
-        let default_bet = BigUint::from(1u64); //10 's a lot for faucet
+        let default_bet = BigUint::from(10u64); //10 's a lot for faucet
 
         let bet_amount = get_or_default(bet_amount, default_bet);
         let bet_amount = BigUint::from(bet_amount);

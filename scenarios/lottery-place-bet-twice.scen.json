@@ -14,7 +14,9 @@
         "to": "sc:lottery",
         "value": "10",
         "function": "place_bet",
-        "arguments": ["6"],
+        "arguments": [
+          "6"
+        ],
         "gasLimit": "10,000,000",
         "gasPrice": "0"
       },
