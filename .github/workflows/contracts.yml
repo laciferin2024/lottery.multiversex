@@ -197,6 +197,10 @@ jobs:
 
           which wasm-opt
 
+      - name: Setup tooling
+        run: |
+          sc-meta install all
+
       - name: Build the wasm contracts
         env:
           RUSTFLAGS: ""
