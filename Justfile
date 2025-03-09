@@ -21,7 +21,7 @@ build *ARGS:
     {{ mx }} all build {{ ARGS }}
 
 setup:
-    mx install all
+    {{ mx }} install all
 
 #    installs all test gen deps
 
