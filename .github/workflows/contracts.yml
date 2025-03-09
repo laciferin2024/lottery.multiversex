@@ -288,7 +288,7 @@ jobs:
 
 
       - name: Setup tooling
-        run:
+        run: |
           cargo install multiversx-sc-meta --version ${{ inputs.sc-meta-version }} --locked
           sc-meta install all
 
