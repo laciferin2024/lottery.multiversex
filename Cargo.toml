@@ -5,6 +5,7 @@ publish = false
 edition = "2021"
 authors = ["Hiro <laciferin@gmail.com>"]
 
+
 [build]
 target = "wasm32-unknown-unknown"
 
@@ -30,6 +31,9 @@ features = ["run-go-tests", "wasm-incompatible"]
 [workspace]
 members = [".", "meta", "interactor"]
 
+[workspace.metadata]
+default-run = "interactor"
+
 
 [profile.release]
 panic = "abort"
@@ -54,3 +58,9 @@ too_many_lines = "allow"
 unnecessary_wraps = "allow"
 wildcard_imports = "allow"
 
+[lints.rust]
+unsafe_code = { level = "forbid", priority = 0 }
+
+
+[badges]
+maintenance = { status = "actively-developed" }
