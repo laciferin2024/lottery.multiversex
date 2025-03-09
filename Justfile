@@ -64,3 +64,6 @@ token recv_address *ARGS:
 
 build-bin:
     cargo build -p rust-interact --bin lottery --release
+
+ci-clear-cache:
+    gh cache list --limit 1000 | awk '{print $1}' | xargs -I {} gh cache delete {}
