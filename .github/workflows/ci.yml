@@ -19,7 +19,7 @@ permissions:
 jobs:
   contracts:
     name: Contracts
-    uses: .github/workflows/contracts.yml
+    uses: ./.github/workflows/contracts.yml
     with:
       rust-toolchain: stable
       #      mx-scenario-go-version: v2.0.0
