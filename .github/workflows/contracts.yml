@@ -289,7 +289,7 @@ jobs:
 
       - name: Setup tooling
         run: |
-          cargo install multiversx-sc-meta --version ${{ inputs.sc-meta-version }} --locked
+          cargo install multiversx-sc-meta --locked
           sc-meta install all
 
       - name: Run the rust tests
