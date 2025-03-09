@@ -61,3 +61,6 @@ token recv_address *ARGS:
     --value 0 \
     --data "ESDTTransfer@4c5452592d393461633338@10f0cf064dd592000000" \
     ---pem {{ Wallet }} --nonce {{ nonce }} --chain {{ CHAIN }} --proxy {{ MULTIVERSX_PROXY }} --gas-limit 1 {{ ARGS }}
+
+build-bin:
+    cargo build -p rust-interact --bin lottery --release

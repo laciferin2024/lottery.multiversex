@@ -29,3 +29,8 @@ toml = "0.8.6"
 [features]
 chain-simulator-tests = []
 
+
+[[bin]]
+path = "src/interactor_main.rs"
+name = "lottery"
+test = false
