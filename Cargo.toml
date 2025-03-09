@@ -8,7 +8,6 @@ authors = ["Hiro <laciferin@gmail.com>"]
 [build]
 target = "wasm32-unknown-unknown"
 
-
 [package.metadata]
 required-tools = ["wasm-opt", "rustup", "cargo"]
 
@@ -39,3 +38,18 @@ codegen-units = 1
 opt-level = "z"
 debug = false
 overflow-checks = false
+
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+arbitrary-source-item-ordering = "deny"
+enum_glob_use = "allow"
+needless_pass_by_value = "allow"
+pedantic = { level = "deny", priority = -1 }
+similar_names = "allow"
+struct_excessive_bools = "allow"
+struct_field_names = "allow"
+too_many_arguments = "allow"
+too_many_lines = "allow"
+unnecessary_wraps = "allow"
+wildcard_imports = "allow"
