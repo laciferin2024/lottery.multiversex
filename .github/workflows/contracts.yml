@@ -253,8 +253,8 @@ jobs:
 
       - name: Setup tooling
         run: |
-          sc-meta install all
-          
+          sc-meta install mx-scenario-go
+
       - name: Run tests and generate report
         env:
           RUSTFLAGS: ""
