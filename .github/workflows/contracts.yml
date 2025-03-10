@@ -111,7 +111,7 @@ jobs:
           path: report.json
 
       - name: Download the base report
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v9
         if: ${{ github.event_name == 'pull_request' && inputs.enable-contracts-size-report }}
         continue-on-error: true
         with:
