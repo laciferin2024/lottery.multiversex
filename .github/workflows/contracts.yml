@@ -199,7 +199,7 @@ jobs:
 
       - name: Setup tooling
         run: |
-          sc-meta install all
+          sc-meta install mx-scenario-go
 
       - name: Build the wasm contracts
         env:
