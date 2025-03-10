@@ -38,10 +38,8 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         // let token_id = TokenIdentifier::from_esdt_bytes("LTRY-94ac38");
         // let token_id = TokenIdentifier::from_esdt_bytes(self.token_ticker());
 
-        // Default AMM settings
-        let fee_percent = 30u64; // 0.3% fee
-
         // Initialize AMM module
+        // let fee_percent = 30u64; // 0.3% fee
         // self.init_amm(token_id, fee_percent); //FIXME: init amm
 
         // Default lottery settings
