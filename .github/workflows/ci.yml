@@ -9,6 +9,8 @@ on:
     tags:
       - "*"
   pull_request:
+    branches:
+      - main
 
 permissions:
   checks: write
@@ -17,10 +19,10 @@ permissions:
 jobs:
   contracts:
     name: Contracts
-    uses: multiversx/mx-sc-actions/.github/workflows/contracts.yml@v4.2.2
+    uses: ./.github/workflows/contracts.yml
     with:
       rust-toolchain: stable
       #      mx-scenario-go-version: v2.0.0
-      enable-interactor-tests: true
+    #      enable-interactor-tests: true
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
