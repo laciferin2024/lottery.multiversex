@@ -67,3 +67,6 @@ build-bin:
 
 ci-clear-cache:
     gh cache list --limit 1000 | awk '{print $1}' | xargs -I {} gh cache delete {}
+
+doc:
+    sc-meta test-coverage --output ./coverage.md;
