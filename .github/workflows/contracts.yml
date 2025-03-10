@@ -251,6 +251,10 @@ jobs:
               cargo install multiversx-sc-meta --version ${{ inputs.sc-meta-version }} --locked
           fi
 
+      - name: Setup tooling
+        run: |
+          sc-meta install all
+          
       - name: Run tests and generate report
         env:
           RUSTFLAGS: ""
