@@ -254,6 +254,7 @@ jobs:
       - name: Setup tooling
         run: |
           sc-meta install mx-scenario-go
+          sc-meta all build 
 
       - name: Run tests and generate report
         env:
