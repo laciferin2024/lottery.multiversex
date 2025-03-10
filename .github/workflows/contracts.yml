@@ -299,7 +299,7 @@ jobs:
       - name: Setup tooling
         run: |
           cargo install multiversx-sc-meta --locked
-          sc-meta install all
+          sc-meta install mx-scenario-go
 
       - name: Run the rust tests
         env:
