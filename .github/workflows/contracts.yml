@@ -300,6 +300,7 @@ jobs:
         run: |
           cargo install multiversx-sc-meta --locked
           sc-meta install mx-scenario-go
+          sc-meta all build
 
       - name: Run the rust tests
         env:
