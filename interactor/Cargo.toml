@@ -4,6 +4,8 @@ version = "0.0.0"
 authors = ["you"]
 edition = "2021"
 publish = false
+default-run = "rust-interact"
+
 
 [[bin]]
 name = "rust-interact"

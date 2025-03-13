@@ -121,11 +121,9 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
 
         self.bet_event(&caller, &current_game_id);
 
-        let participants = self.participants(&current_game_id);
-
         // If all participants have joined, draw the winner
-        if participants.len() == self.num_participants().get() {
-            self.draw_winner(current_game_id, participants);
+        if self.participants(&current_game_id).len() == self.num_participants().get() {
+            self.draw_winner(current_game_id);
         }
     }
 
@@ -139,7 +137,7 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         (game_active, current_participants, num_participants).into()
     }
 
-    fn draw_winner(&self, game_id: u32, participants: VecMapper<Self::Api, ManagedAddress<Self::Api>>) {
+    fn draw_winner(&self, game_id: u32) {
         sc_print!("draw winner:{}", game_id);
         // Generate random number (0-9)
         let mut rand_source = RandomnessSource::new();
@@ -148,6 +146,8 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
 
         // Store the winning number
         self.winning_number(&game_id).set(random_number);
+
+        let participants = self.participants(&game_id);
 
         // Find winners
         // let participants = self.participants(&game_id);
