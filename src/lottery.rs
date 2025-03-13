@@ -119,14 +119,15 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         let participants = self.participants(&game_id);
         let mut winners = ManagedVec::new() as ManagedVec<ManagedAddress>;
 
-        for i in 0..participants.len() {
-            let participant = participants.get(i);
+
+        for participant in participants.iter() {
             let player_number = self.player_numbers(&game_id, &participant).get();
 
             if player_number == random_number {
                 winners.push(participant);
             }
         }
+
 
         // Calculate rewards
         let total_pot = &self.bet_amount().get() * &BigUint::from(participants.len());
