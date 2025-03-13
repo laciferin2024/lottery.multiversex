@@ -153,14 +153,14 @@ pub trait Lottery: token::LotteryToken + amm::LotteryAMM {
         // let participants = self.participants(&game_id);
         let mut winners = ManagedVec::new() as ManagedVec<ManagedAddress>;
 
-        // for participant in participants.iter() {
-        //     let player_number = self.player_numbers(&game_id, &participant).get();
-        //
-        //     if player_number == random_number {
-        //         winners.push(participant.clone());
-        //         self.winner_event(&participant, &game_id)
-        //     }
-        // }
+        for participant in participants.iter() {
+            let player_number = self.player_numbers(&game_id, &participant).get();
+
+            if player_number == random_number {
+                winners.push(participant.clone());
+                self.winner_event(&participant, &game_id)
+            }
+        }
 
         // for i in 1..participants.len() { //vec mapper starts from 1
         //     // FIXME: u can't do this as participants.get is fetching from blockchain but this is being called
