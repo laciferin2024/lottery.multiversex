@@ -15,12 +15,13 @@ use std::{
     panic,
     path::Path,
 };
+use tracing::info;
 use lottery::__wasm__endpoints__::token_id;
 
 const STATE_FILE: &str = "state.toml";
 
 pub async fn lottery_cli() {
-    env_logger::init();
+    // env_logger::init();
 
     let mut args = RefCell::new(std::env::args().skip(1)); //program name
 
@@ -59,9 +60,11 @@ pub async fn lottery_cli() {
             let token_id = if token_id_str == "EGLD" {
                 EgldOrEsdtTokenIdentifier::egld()
             } else {
-                EgldOrEsdtTokenIdentifier::from(ManagedBuffer::from(token_id_str))
+                EgldOrEsdtTokenIdentifier::from(ManagedBuffer::from(token_id_str.clone()))
             };
             // let token_id = ManagedBuffer::from(token_id);
+
+            info!(num_participants, token_id_str, bet_amount_str);
 
             interact.deploy(num_participants, OptionalValue::Some(token_id), OptionalValue::Some(bet_amount.unwrap())).await;
         }
