@@ -1,47 +1,49 @@
-# Elrond Smart Contract Exercise
+# 🛰️ Mission Reporting
 
-# Organization
+> ⚠️ **Disclaimer:** This project is a work in progress. Due to time constraints, I have prioritized end-to-end
+> functionality for key contract features, which can be found here: [i.rs](interactor/src/i.rs). In **v2**, we will focus
+> on stabilizing the remaining functionalities.
 
-You have one week to complete this exercise.
 
-Once your project is submitted, we will review it, and if it meets our expectations, we will schedule an interview with you for a technical review.
+**👤 Hiro**
 
-This interview will be an opportunity for you to explain your submission: code, design, etc. We will also take this opportunity to ask you technical questions.
+📜 **Mission:** [Mission.md](./Mission.md)
 
-# Critères d’évaluation
+---
 
-You will be evaluated on the following criteria:
+## 🚀 1. Token Contract
 
-- **Compliance with requirements**: Does the smart contract meet the expectations?
-- **Design and architecture**: Understanding that there is not just one correct solution, your choices will need to be defended during your interview at our offices. The evaluation will focus on your arguments and explanations.
-- **Best practices**: Tools used, versioning, tests, etc.
-- **Bonus**: Feel free to add additional elements to showcase the breadth of your skills.
+🔗 **LTRY-94ac38:** [View on Explorer](https://devnet-explorer.multiversx.com/tokens/LTRY-94ac38)
 
-# Mission
+---
 
-## Part 1: Token
+## 🎲 2. Lottery Contract
 
-You must develop and deploy your own token on the Elrond testnet. You are free to configure it as you see fit (name, symbol, burn, etc.).
+📌 **Find latest contract in:** `interactor/state.toml`
 
-## Part 2: Loterie
+✅ **Mission Accomplished:
+** [Transaction](https://devnet-explorer.multiversx.com/transactions/49dd0c9d51dc78627d700bc2e23cfe9ef17d3e0b85b6ab1185405a8a9fe61e2d)
 
-You must develop a lottery smart contract that allows multiple participants (a parameter set during the smart contract's creation) to bet a fixed amount of your new token on a number between 0 and 9 (inclusive). Once the last participant has placed their bet, the smart contract generates a random number. Participants who bet on this number share the locked tokens. If there are no winners, the tokens are returned to the players.
+> For simplicity, `num_participants` was set to `1`, and it works as shown in the above transaction.
 
-### Example of a game:
+### 🔧 TODO:
 
-- Nicolas deploys the smart contract, specifying that the number of participants is 3 and the bet amount is 10 tokens.
-- Nathaël bets 10 tokens on the number 2.
-- Alexandre bets 10 tokens on the number 4.
-- Étienne bets 10 tokens on the number 1.
-- The smart contract draws the number 2. Nathaël, therefore, receives the 30 tokens.
+- [ ] Implement **Interactor tests with EGLD** (allows testing with `test_wallets`).
+- [ ] Use **Lottery Contract as a Super Dapp** with its own token module.
+    - ✅ Integrated, but feasibility needs verification.
 
-### Example of a second game:
+---
 
-- Nathaël bets 10 tokens on the number 2.
-- Alexandre bets 10 tokens on the number 4.
-- Étienne bets 10 tokens on the number 1.
-- The smart contract draws the number 3. Each player gets their bet back.
+## 💱 3. AMM
 
-## Part 3: AMM
+✅ **Contract Prototyped**
+> _There might be more refined implementations of the same._
 
-So far, your token is difficult to trade. Deploy a liquidity pool so that anyone can buy or sell your token.
+✅ **Supports Liquidity with EGLD:** [View Code](src/amm.rs#L24)
+
+### 🔧 TODO:
+
+- [x] **Tests with Scenarios**
+- [x] **Write Integration Tests**  
+
+

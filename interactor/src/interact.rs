@@ -1,16 +1,21 @@
 #![allow(non_snake_case)]
 
 pub mod config;
-mod proxy;
 mod i;
+mod proxy;
+mod interact_cli;
 
+use bech32::encode;
 use config::Config;
 use multiversx_sc_snippets::imports::*;
 use serde::{Deserialize, Serialize};
-use std::{io::{Read, Write}, panic, path::Path};
 use std::cell::RefCell;
-use bech32::{encode};
-
+use std::{
+    io::{Read, Write},
+    panic,
+    path::Path,
+};
+use lottery::__wasm__endpoints__::token_id;
 
 const STATE_FILE: &str = "state.toml";
 
@@ -19,20 +24,15 @@ pub async fn lottery_cli() {
 
     let mut args = RefCell::new(std::env::args().skip(1)); //program name
 
-    let _arg = || -> Option<String> {
-        args.borrow_mut().next()
-    };
+    let _arg = || -> Option<String> { args.borrow_mut().next() };
 
     let cmd = _arg().expect("at least one argument required");
     let config = Config::new();
     let mut interact = ContractInteract::new(config).await;
 
-    let arg = || -> String {
-        _arg().expect("expected argument")
-    };
+    let arg = || -> String { _arg().expect("expected argument") };
 
-
-    let mut get_addr = || -> Bech32Address{
+    let mut get_addr = || -> Bech32Address {
         let address = _arg();
         if address.is_some() {
             let address = Bech32Address::from_bech32_string(address.unwrap());
@@ -40,7 +40,6 @@ pub async fn lottery_cli() {
             dbg!("Address from Bech32: {}", address.clone());
             return address;
         }
-
 
         // let address = arg();
         let address = interact.wallet_address.clone();
@@ -50,8 +49,36 @@ pub async fn lottery_cli() {
     };
 
     match cmd.as_str() {
-        "deploy" => interact.deploy().await,
-        "upgrade" => interact.upgrade().await,
+        "deploy" => {
+            let num_participants = _arg().unwrap_or("1".to_string()).parse::<usize>().unwrap();
+            let token_id_str = _arg().unwrap_or("LTRY-94ac38".to_string());
+            let bet_amount_str = _arg().unwrap_or("10".to_string());
+            let bet_amount = bet_amount_str.parse::<u64>().ok().map(BigUint::from);
+
+
+            let token_id = if token_id_str == "EGLD" {
+                EgldOrEsdtTokenIdentifier::egld()
+            } else {
+                EgldOrEsdtTokenIdentifier::from(ManagedBuffer::from(token_id_str))
+            };
+            // let token_id = ManagedBuffer::from(token_id);
+
+            interact.deploy(num_participants, OptionalValue::Some(token_id), OptionalValue::Some(bet_amount.unwrap())).await;
+        }
+        "upgrade" => {
+            let num_participants = _arg().unwrap_or("1".to_string()).parse::<usize>().unwrap();
+            let token_id_str = _arg().unwrap_or("LTRY-94ac38".to_string());
+            let bet_amount_str = _arg().unwrap_or("10".to_string());
+            let bet_amount = bet_amount_str.parse::<u64>().ok().map(BigUint::from);
+
+            let token_id = if token_id_str == "EGLD" {
+                EgldOrEsdtTokenIdentifier::egld()
+            } else {
+                EgldOrEsdtTokenIdentifier::from(ManagedBuffer::from(token_id_str))
+            };
+
+            interact.upgrade(OptionalValue::Some(num_participants), OptionalValue::Some(token_id), OptionalValue::Some(bet_amount.unwrap())).await;
+        }
         "place_bet" => {
             let no = arg();
             interact.place_bet(no.parse::<u8>().unwrap()).await
@@ -62,10 +89,10 @@ pub async fn lottery_cli() {
             interact.mint(address.clone(), 1000u128).await;
             interact.get_token_balance(address).await
         }
-        "getTokenBalance" => {
-            interact.get_token_balance(get_addr()).await
+        "getTokenBalance" => interact.get_token_balance(get_addr()).await,
+        "token_id" => {
+            interact.token_id().await;
         }
-        "token_id" => { interact.token_id().await; }
         "num_participants" => interact.num_participants().await,
         "bet_amount" => {
             interact.bet_amount().await;
@@ -85,8 +112,6 @@ pub async fn lottery_cli() {
         "getLpBalance" => interact.get_lp_balance().await,
         _ => panic!("unknown command: {}", &cmd),
     }
-
-    return;
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -137,68 +162,6 @@ pub struct ContractInteract {
 }
 
 impl ContractInteract {
-    pub async fn new(config: Config) -> Self {
-        let mut interactor = Interactor::new(config.gateway_uri())
-            .await
-            .use_chain_simulator(config.use_chain_simulator());
-
-        interactor.set_current_dir_from_workspace("lottery");
-        let wallet_address = interactor.register_wallet(test_wallets::alice()).await;
-
-        // Useful in the chain simulator setting
-        // generate blocks until ESDTSystemSCAddress is enabled
-        interactor.generate_blocks_until_epoch(1).await.unwrap();
-
-        let contract_code = BytesValue::interpret_from(
-            "mxsc:../output/lottery.mxsc.json",
-            &InterpreterContext::default(),
-        );
-
-        ContractInteract {
-            interactor,
-            wallet_address,
-            contract_code,
-            state: State::load_state(),
-        }
-    }
-
-    pub async fn deploy(&mut self) {
-        let new_address = self
-            .interactor
-            .tx()
-            .from(&self.wallet_address)
-            .gas(30_000_000u64)
-            .typed(proxy::LotteryProxy)
-            .init()
-            .code(&self.contract_code)
-            .returns(ReturnsNewAddress)
-            .run()
-            .await;
-        let new_address_bech32 = bech32::encode(&new_address);
-        self.state
-            .set_address(Bech32Address::from_bech32_string(new_address_bech32.clone()));
-
-        println!("new address: {new_address_bech32}");
-    }
-
-    pub async fn upgrade(&mut self) {
-        let response = self
-            .interactor
-            .tx()
-            .to(self.state.current_address())
-            .from(&self.wallet_address)
-            .gas(30_000_000u64)
-            .typed(proxy::LotteryProxy)
-            .upgrade()
-            .code(&self.contract_code)
-            .code_metadata(CodeMetadata::UPGRADEABLE)
-            .returns(ReturnsResultUnmanaged)
-            .run()
-            .await;
-
-        println!("Result: {response:?}");
-    }
-
     pub async fn get_game_status(&mut self) {
         let result_value = self
             .interactor
@@ -411,7 +374,11 @@ impl ContractInteract {
             .gas(30_000_000u64)
             .typed(proxy::LotteryProxy)
             .swap_tokens_for_egld()
-            .payment((TokenIdentifier::from(token_id.as_str()), token_nonce, token_amount))
+            .payment((
+                TokenIdentifier::from(token_id.as_str()),
+                token_nonce,
+                token_amount,
+            ))
             .returns(ReturnsResultUnmanaged)
             .run()
             .await;
@@ -449,4 +416,3 @@ impl ContractInteract {
         println!("Result: {result_value:?}");
     }
 }
-

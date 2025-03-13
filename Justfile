@@ -20,25 +20,35 @@ nonce := "0"
 build *ARGS:
     {{ mx }} all build {{ ARGS }}
 
+setup:
+    {{ mx }} install all
+
+#    installs all test gen deps
+
 wallet:
     {{ mx }} wallet new --format pem --outfile ./wallet/hiro.pem
 
+[group('deploy')]
 deploy *ARGS: build
     just i deploy
 
+[group('deploy')]
 deploy1 *ARGS="":
     mxpy contract deploy --pem {{ Wallet }} --gas-limit=60000000 --bytecode output/lottery.wasm --nonce {{ nonce }} --chain {{ CHAIN }} --proxy {{ MULTIVERSX_PROXY }} {{ ARGS }}
 
 call *ARGS="":
     mxpy contract call erd1qqqqqqqqqqqqqpgqej707lk86ap308nyauejqhvvq0sgmpq8d8ss2nmpvf --function=beta_amount  --arguments "1"  --pem {{ Wallet }} --nonce {{ nonce }} --chain {{ CHAIN }} --proxy {{ MULTIVERSX_PROXY }} --gas-limit 1 {{ ARGS }}
 
+[group('test')]
 test:
     cargo test
 
 gen-i *ARGS:
     {{ mx }} all snippets {{ ARGS }}
 
-i cmd *ARGS:
+alias i := interactor
+
+interactor cmd *ARGS:
     #!/bin/bash
     cd interactor
     cargo run {{ cmd }} {{ ARGS }}
@@ -51,3 +61,12 @@ token recv_address *ARGS:
     --value 0 \
     --data "ESDTTransfer@4c5452592d393461633338@10f0cf064dd592000000" \
     ---pem {{ Wallet }} --nonce {{ nonce }} --chain {{ CHAIN }} --proxy {{ MULTIVERSX_PROXY }} --gas-limit 1 {{ ARGS }}
+
+build-bin:
+    cargo build -p rust-interact --bin lottery --release
+
+ci-clear-cache:
+    gh cache list --limit 1000 | awk '{print $1}' | xargs -I {} gh cache delete {}
+
+doc:
+    sc-meta test-coverage --output ./coverage.md;

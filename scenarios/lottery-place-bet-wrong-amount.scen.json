@@ -1,0 +1,29 @@
+{
+  "name": "lottery place bet with wrong amount test",
+  "gasSchedule": "v4",
+  "steps": [
+    {
+      "step": "externalSteps",
+      "path": "lottery-init.scen.json"
+    },
+    {
+      "step": "scCall",
+      "txId": "place-bet-wrong-amount",
+      "tx": {
+        "from": "address:participant1",
+        "to": "sc:lottery",
+        "value": "15",
+        "function": "place_bet",
+        "arguments": ["5"],
+        "gasLimit": "10,000,000",
+        "gasPrice": "0"
+      },
+      "expect": {
+        "status": "4",
+        "message": "str:Wrong amount sent for bet",
+        "gas": "*",
+        "refund": "*"
+      }
+    }
+  ]
+}

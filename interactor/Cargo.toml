@@ -4,6 +4,8 @@ version = "0.0.0"
 authors = ["you"]
 edition = "2021"
 publish = false
+default-run = "rust-interact"
+
 
 [[bin]]
 name = "rust-interact"
@@ -29,3 +31,8 @@ toml = "0.8.6"
 [features]
 chain-simulator-tests = []
 
+
+[[bin]]
+path = "src/interactor_main.rs"
+name = "lottery"
+test = false

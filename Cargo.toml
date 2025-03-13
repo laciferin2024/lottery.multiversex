@@ -5,15 +5,18 @@ publish = false
 edition = "2021"
 authors = ["Hiro <laciferin@gmail.com>"]
 
+
 [build]
 target = "wasm32-unknown-unknown"
-
 
 [package.metadata]
 required-tools = ["wasm-opt", "rustup", "cargo"]
 
 [lib]
 path = "src/lottery.rs"
+
+[dependencies]
+#multiversx-sc-scenario = { version = "0.56.1", features = ["run-go-tests"] }
 
 [dependencies.multiversx-sc]
 version = "0.56.1"
@@ -23,9 +26,13 @@ num-bigint = "0.4"
 
 [dev-dependencies.multiversx-sc-scenario]
 version = "0.56.1"
+features = ["run-go-tests", "wasm-incompatible"]
 
 [workspace]
 members = [".", "meta", "interactor"]
+
+[workspace.metadata]
+default-run = "interactor"
 
 
 [profile.release]
@@ -35,3 +42,25 @@ codegen-units = 1
 opt-level = "z"
 debug = false
 overflow-checks = false
+
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+arbitrary-source-item-ordering = "deny"
+enum_glob_use = "allow"
+needless_pass_by_value = "allow"
+pedantic = { level = "deny", priority = -1 }
+similar_names = "allow"
+struct_excessive_bools = "allow"
+struct_field_names = "allow"
+too_many_arguments = "allow"
+too_many_lines = "allow"
+unnecessary_wraps = "allow"
+wildcard_imports = "allow"
+
+[lints.rust]
+unsafe_code = { level = "forbid", priority = 0 }
+
+
+[badges]
+maintenance = { status = "actively-developed" }

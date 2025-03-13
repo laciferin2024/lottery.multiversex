@@ -1,0 +1,63 @@
+{
+  "name": "lottery complete game with winner test",
+  "gasSchedule": "v4",
+  "steps": [
+    {
+      "step": "externalSteps",
+      "path": "lottery-place-multiple-bets.scen.json"
+    },
+    {
+      "step": "setState",
+      "comment": "set up a predictable randomness source for testing",
+      "randomnessSource": "random:seed1234"
+    },
+    {
+      "step": "scCall",
+      "txId": "place-bet-participant3-completes-game",
+      "tx": {
+        "from": "address:participant3",
+        "to": "sc:lottery",
+        "value": "10",
+        "function": "place_bet",
+        "arguments": ["3"],
+        "gasLimit": "10,000,000",
+        "gasPrice": "0"
+      },
+      "expect": {
+        "status": "0",
+        "gas": "*",
+        "refund": "*"
+      }
+    },
+    {
+      "step": "checkState",
+      "accounts": {
+        "address:participant1": {
+          "nonce": "*",
+          "balance": "+",
+          "storage": {}
+        },
+        "address:participant2": {
+          "nonce": "*",
+          "balance": "+",
+          "storage": {}
+        },
+        "address:participant3": {
+          "nonce": "*",
+          "balance": "+",
+          "storage": {}
+        },
+        "sc:lottery": {
+          "nonce": "0",
+          "balance": "*",
+          "storage": {
+            "str:currentGameId": "2",
+            "str:winningNumber|u32:1": "+",
+            "+": ""
+          },
+          "code": "mxsc:../output/lottery.mxsc.json"
+        }
+      }
+    }
+  ]
+}

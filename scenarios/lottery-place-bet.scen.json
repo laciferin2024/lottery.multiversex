@@ -1,0 +1,56 @@
+{
+  "name": "lottery place bet test",
+  "gasSchedule": "v4",
+  "steps": [
+    {
+      "step": "externalSteps",
+      "path": "lottery-init.scen.json"
+    },
+    {
+      "step": "scCall",
+      "txId": "place-bet-participant1",
+      "tx": {
+        "from": "address:participant1",
+        "to": "sc:lottery",
+        "value": "10",
+        "function": "place_bet",
+        "arguments": [
+          "5"
+        ],
+        "gasLimit": "10,000,000",
+        "gasPrice": "0"
+      },
+      "expect": {
+        "status": "0",
+        "gas": "*",
+        "refund": "*"
+      }
+    },
+    {
+      "step": "checkState",
+      "accounts": {
+        "address:participant1": {
+          "nonce": "*",
+          "balance": "999,999,999,999,999,990",
+          "storage": {}
+        },
+        "sc:lottery": {
+          "nonce": "0",
+          "balance": "10",
+          "storage": {
+            "str:tokenId": "str:EGLD",
+            "str:numParticipants": "3",
+            "str:betAmount": "10",
+            "str:gameActive": "true",
+            "str:currentGameId": "1",
+            "str:participants|u32:1|str:.len": "1",
+            "str:playerNumbers|u32:1|address:participant1": "5",
+            "str:hasPlacedBet|u32:1|address:participant1": "true",
+            "+": ""
+          },
+          "code": "mxsc:../output/lottery.mxsc.json"
+        }
+      }
+    }
+  ]
+}

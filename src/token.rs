@@ -1,16 +1,13 @@
-#![no_std]
-
 #[allow(unused_imports)]
 use multiversx_sc::imports::*;
 
 #[multiversx_sc::module]
 pub trait LotteryToken {
-
     fn init_token(
         &self,
         initial_supply: BigUint,
         token_name: ManagedBuffer,
-        token_ticker: ManagedBuffer
+        token_ticker: ManagedBuffer,
     ) {
         let caller = self.blockchain().get_caller();
 
@@ -31,7 +28,8 @@ pub trait LotteryToken {
         let new_supply = current_supply + &amount;
 
         self.token_supply().set(&new_supply);
-        self.token_balance(&recipient).update(|balance| *balance += &amount);
+        self.token_balance(&recipient)
+            .update(|balance| *balance += &amount);
     }
 
     // Burn tokens
@@ -59,10 +57,12 @@ pub trait LotteryToken {
         require!(sender_balance >= amount, "Insufficient balance");
 
         // Deduct from sender
-        self.token_balance(&sender).update(|balance| *balance -= &amount);
+        self.token_balance(&sender)
+            .update(|balance| *balance -= &amount);
 
         // Add to recipient
-        self.token_balance(&recipient).update(|balance| *balance += &amount);
+        self.token_balance(&recipient)
+            .update(|balance| *balance += &amount);
     }
 
     // Storage getters
