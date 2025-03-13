@@ -25,8 +25,11 @@ pub async fn lottery_cli() {
     let cmd = _arg().expect("at least one argument required");
     let config = Config::new();
 
-    let walletStr = env::var("WALLET").unwrap_or("../wallets/hiro.pem".parse().unwrap());
-    let wallet = Wallet::from_pem_file(&walletStr);
+    let walletStr = env::var("WALLET").unwrap_or("hiro".parse().unwrap());
+    let wallet_path = format!("../wallets/{walletStr}.pem");
+    info!(wallet_path);
+
+    let wallet = Wallet::from_pem_file(&wallet_path);
 
     let mut interact = ContractInteract::new(config, wallet.ok()).await;
 

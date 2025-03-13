@@ -16,6 +16,7 @@ Wallet := "wallets/hiro.pem"
 MULTIVERSX_PROXY := "https://devnet-gateway.multiversx.com"
 CHAIN := "D"
 nonce := "0"
+WALLET := env("WALLET", "hiro")
 
 build *ARGS:
     {{ mx }} all build {{ ARGS }}
@@ -30,7 +31,7 @@ wallet:
 
 [group('deploy')]
 deploy *ARGS: build
-    just i deploy
+    WALLET={{ WALLET }} just i deploy
 
 [group('deploy')]
 deploy1 *ARGS="":
@@ -51,7 +52,7 @@ alias i := interactor
 interactor cmd *ARGS:
     #!/bin/bash
     cd interactor
-    cargo run {{ cmd }} {{ ARGS }}
+    WALLET={{ WALLET }} cargo run {{ cmd }} {{ ARGS }}
 
 TOKEN := "LTRY-94ac38"
 
