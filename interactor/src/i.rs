@@ -1,8 +1,6 @@
-use multiversx_sc::codec;
 use crate::{proxy, ContractInteract, State};
-use multiversx_sc::imports::{BigUint, CodeMetadata, EgldOrEsdtTokenIdentifier, OptionalValue, ReturnsNewAddress, ReturnsResultUnmanaged, TokenIdentifier};
-use multiversx_sc::types::BigInt;
-use multiversx_sc_snippets::imports::{bech32, Bech32Address, BytesValue, DebugApi, InterpretableFrom, InterpreterContext, StaticApi, Wallet};
+use multiversx_sc::imports::{BigUint, CodeMetadata, EgldOrEsdtTokenIdentifier, OptionalValue, ReturnsNewAddress, ReturnsResultUnmanaged};
+use multiversx_sc_snippets::imports::{bech32, Bech32Address, BytesValue, InterpretableFrom, InterpreterContext, StaticApi};
 use multiversx_sc_snippets::{test_wallets, Interactor, InteractorRunAsync};
 use crate::config::Config;
 

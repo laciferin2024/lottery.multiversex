@@ -16,14 +16,13 @@ use std::{
     path::Path,
 };
 use tracing::info;
-use lottery::__wasm__endpoints__::token_id;
 
 const STATE_FILE: &str = "state.toml";
 
 pub async fn lottery_cli() {
     // env_logger::init();
 
-    let mut args = RefCell::new(std::env::args().skip(1)); //program name
+    let args = RefCell::new(std::env::args().skip(1)); //program name
 
     let _arg = || -> Option<String> { args.borrow_mut().next() };
 
@@ -33,7 +32,7 @@ pub async fn lottery_cli() {
 
     let arg = || -> String { _arg().expect("expected argument") };
 
-    let mut get_addr = || -> Bech32Address {
+    let get_addr = || -> Bech32Address {
         let address = _arg();
         if address.is_some() {
             let address = Bech32Address::from_bech32_string(address.unwrap());
