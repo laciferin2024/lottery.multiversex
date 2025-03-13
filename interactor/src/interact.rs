@@ -10,11 +10,7 @@ use config::Config;
 use multiversx_sc_snippets::imports::*;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
-use std::{
-    io::{Read, Write},
-    panic,
-    path::Path,
-};
+use std::{env, io::{Read, Write}, panic, path::Path};
 use tracing::info;
 
 const STATE_FILE: &str = "state.toml";
@@ -28,7 +24,11 @@ pub async fn lottery_cli() {
 
     let cmd = _arg().expect("at least one argument required");
     let config = Config::new();
-    let mut interact = ContractInteract::new(config).await;
+
+    let walletStr = env::var("WALLET").unwrap_or("../wallets/hiro.pem".parse().unwrap());
+    let wallet = Wallet::from_pem_file(&walletStr);
+
+    let mut interact = ContractInteract::new(config, wallet.ok()).await;
 
     let arg = || -> String { _arg().expect("expected argument") };
 

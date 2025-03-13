@@ -1,11 +1,11 @@
 use crate::{proxy, ContractInteract, State};
 use multiversx_sc::imports::{BigUint, CodeMetadata, EgldOrEsdtTokenIdentifier, OptionalValue, ReturnsNewAddress, ReturnsResultUnmanaged};
-use multiversx_sc_snippets::imports::{bech32, Bech32Address, BytesValue, InterpretableFrom, InterpreterContext, StaticApi};
-use multiversx_sc_snippets::{test_wallets, Interactor, InteractorRunAsync};
+use multiversx_sc_snippets::imports::{bech32, Bech32Address, BytesValue, InterpretableFrom, InterpreterContext, StaticApi, Wallet};
+use multiversx_sc_snippets::{Interactor, InteractorRunAsync};
 use crate::config::Config;
 
 impl ContractInteract {
-    pub async fn new(config: Config) -> Self {
+    pub async fn new(config: Config, wallet: Option<Wallet>) -> Self {
         let mut interactor = Interactor::new(config.gateway_uri())
             .await
             .use_chain_simulator(config.use_chain_simulator());
@@ -13,9 +13,11 @@ impl ContractInteract {
 
         interactor.set_current_dir_from_workspace("lottery");
 
-        // let wallet = Wallet::from_pem_file("../wallet/hiro.pem").expect("wallet not found");
+        let hiro = Wallet::from_pem_file("../wallets/hiro.pem");
 
-        let wallet = test_wallets::alice();
+        let wallet = wallet.unwrap_or(hiro.unwrap());
+
+        // let wallet = test_wallets::alice();
 
         let wallet_address = interactor.register_wallet(wallet).await;
 

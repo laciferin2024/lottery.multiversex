@@ -12,7 +12,7 @@ set dotenv-filename := ".env"
 set export := true
 
 mx := "sc-meta"
-Wallet := "wallet/hiro.pem"
+Wallet := "wallets/hiro.pem"
 MULTIVERSX_PROXY := "https://devnet-gateway.multiversx.com"
 CHAIN := "D"
 nonce := "0"
@@ -26,7 +26,7 @@ setup:
 #    installs all test gen deps
 
 wallet:
-    {{ mx }} wallet new --format pem --outfile ./wallet/hiro.pem
+    {{ mx }} wallet new --format pem --outfile ./wallets/hiro.pem
 
 [group('deploy')]
 deploy *ARGS: build
