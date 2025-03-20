@@ -71,7 +71,7 @@ pub async fn lottery_cli() {
             interact.deploy(num_participants, OptionalValue::Some(token_id), OptionalValue::Some(bet_amount.unwrap())).await;
         }
         "upgrade" => {
-            let num_participants = _arg().unwrap_or("1".to_string()).parse::<usize>().unwrap();
+            let num_participants = _arg().unwrap_or("1".to_string()).parse::<usize>().ok();
             let token_id_str = _arg().unwrap_or("LTRY-94ac38".to_string());
             let bet_amount_str = _arg().unwrap_or("10".to_string());
             let bet_amount = bet_amount_str.parse::<u64>().ok().map(BigUint::from);
@@ -82,7 +82,7 @@ pub async fn lottery_cli() {
                 EgldOrEsdtTokenIdentifier::from(ManagedBuffer::from(token_id_str))
             };
 
-            interact.upgrade(OptionalValue::Some(num_participants), OptionalValue::Some(token_id), OptionalValue::Some(bet_amount.unwrap())).await;
+            interact.upgrade(OptionalValue::from(num_participants), OptionalValue::Some(token_id), OptionalValue::Some(bet_amount.unwrap())).await;
         }
         "place_bet" => {
             let no = arg();
