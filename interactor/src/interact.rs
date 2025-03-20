@@ -11,6 +11,7 @@ use multiversx_sc_snippets::imports::*;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::{env, io::{Read, Write}, panic, path::Path};
+use clap::builder::TypedValueParser;
 use tracing::info;
 
 const STATE_FILE: &str = "state.toml";
@@ -72,17 +73,22 @@ pub async fn lottery_cli() {
         }
         "upgrade" => {
             let num_participants = _arg().unwrap_or("1".to_string()).parse::<usize>().ok();
-            let token_id_str = _arg().unwrap_or("LTRY-94ac38".to_string());
-            let bet_amount_str = _arg().unwrap_or("10".to_string());
-            let bet_amount = bet_amount_str.parse::<u64>().ok().map(BigUint::from);
+            let token_id_str = _arg();
+            let bet_amount_str = _arg().map(|bet| {
+                bet.parse::<u64>().unwrap()
+            });
+            let bet_amount = bet_amount_str.map(|bet| {
+                BigUint::from(bet)
+            });
 
-            let token_id = if token_id_str == "EGLD" {
-                EgldOrEsdtTokenIdentifier::egld()
-            } else {
-                EgldOrEsdtTokenIdentifier::from(ManagedBuffer::from(token_id_str))
-            };
-
-            interact.upgrade(OptionalValue::from(num_participants), OptionalValue::Some(token_id), OptionalValue::Some(bet_amount.unwrap())).await;
+            let token_id = token_id_str.map(|id| {
+                if id == "EGLD" {
+                    EgldOrEsdtTokenIdentifier::egld()
+                } else {
+                    EgldOrEsdtTokenIdentifier::from(ManagedBuffer::from(id))
+                }
+            });
+            interact.upgrade(OptionalValue::from(num_participants), OptionalValue::from(token_id), OptionalValue::from(bet_amount)).await;
         }
         "place_bet" => {
             let no = arg();
